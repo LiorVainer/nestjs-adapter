@@ -101,7 +101,7 @@ export default defineAdapter<typeof TOKEN, Options>()(
 ```typescript
 constructor(
   @InjectPort(STORAGE_TOKEN)
-  private storage: StorageProvider
+  private storage: StoragePort
 ) {}
 ```
 

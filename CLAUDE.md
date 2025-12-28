@@ -1,8 +1,3 @@
-# Do after each code change:
-# - Run `bun run lint && bun run type-check` to ensure no style or type errors.
-# - Run `npx vibechck .` to detect hallucinations, lazy implementation, and security shortcuts.
-
-
 <!-- OPENSPEC:START -->
 # OpenSpec Instructions
 
@@ -26,6 +21,11 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+# Do after each code change:
+- Run `bun run lint && bun run type-check` to ensure no style or type errors.
+- Run `npx vibechck .` to detect hallucinations, lazy implementation, and security shortcuts.
+
+
 ## Project Overview
 
 This is a NestJS adapter library implementing the Ports & Adapters (Hexagonal Architecture) pattern. The library provides base classes (`Adapter` and `FeatureModule`) that enable building pluggable, type-safe adapters for NestJS applications with minimal boilerplate.
@@ -44,7 +44,7 @@ This is a NestJS adapter library implementing the Ports & Adapters (Hexagonal Ar
 - Must extend `Adapter.forToken(TOKEN)<OptionsType>`
 - Automatically handle:
   - Token registration and aliasing (`useExisting`)
-  - Provider configuration
+  - Port configuration
   - Export management
 - Support both `register()` (sync) and `registerAsync()` (async with DI)
 
@@ -132,7 +132,7 @@ Key implementation files (to be created):
 2. **Class-based Modules**: Use NestJS class-based dynamic modules, not function factories
 3. **App-owned Configuration**: Never use `process.env` in library code; apps provide configuration
 4. **Single Responsibility**: Adapters handle infrastructure only; domain logic lives in feature modules
-5. **Provider Token Exports**: Always export tokens, never export provider objects directly
+5. **Port Token Exports**: Always export tokens, never export provider objects directly
 
 
 Always use context7 when I need code generation, setup or configuration steps, or

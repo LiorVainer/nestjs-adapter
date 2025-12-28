@@ -9,7 +9,7 @@
 - [ ] 2.1 Create `src/core/adapter.base.ts` with abstract `Adapter<TToken, TOptions>` class
 - [ ] 2.2 Implement protected abstract properties: `token` and `implementation`
 - [ ] 2.3 Implement optional `imports()` method for module imports
-- [ ] 2.4 Implement optional `extraProviders()` method for additional providers
+- [ ] 2.4 Implement optional `extraPoviders()` method for additional providers
 - [ ] 2.5 Implement static `register()` method for sync configuration
 - [ ] 2.6 Implement static `registerAsync()` method for async configuration
 - [ ] 2.7 Implement static `forToken()` helper for declarative token binding

@@ -1,50 +1,38 @@
 import 'reflect-metadata'
 import type { Type } from '@nestjs/common'
 import { Inject } from '@nestjs/common'
-import { ADAPTER_IMPL_METADATA, ADAPTER_TOKEN_METADATA } from './constants'
+import { PORT_IMPLEMENTATION_METADATA, PORT_TOKEN_METADATA } from './constants'
+import type { PortConfig } from './types.ts'
 
 /**
- * Declares which port token the adapter provides.
+ * Declares the port configuration for an adapter (token and implementation).
  *
- * This decorator stores the token in class metadata, which is read at runtime
- * by the Adapter base class's register() and registerAsync() methods.
+ * This decorator stores both the port token and implementation class in metadata,
+ * which is read at runtime by the Adapter base class's register() and registerAsync() methods.
  *
- * @param token - The port token this adapter provides
+ * @param config - Port configuration object
+ * @param config.token - The port token this adapter provides
+ * @param config.implementation - The concrete implementation class that provides the port functionality
  *
  * @example
  * ```typescript
- * @AdapterToken(OBJECT_STORAGE_PROVIDER)
- * @AdapterImpl(S3Service)
+ * @Port({
+ *   token: OBJECT_STORAGE_PORT,
+ *   implementation: S3ObjectStorageService
+ * })
  * class S3Adapter extends Adapter<S3Options> {}
  * ```
  */
-export function AdapterToken<TToken>(token: TToken): ClassDecorator {
-	return (target: unknown) => {
-		Reflect.defineMetadata(ADAPTER_TOKEN_METADATA, token, target as object)
-	}
-}
-
-/**
- * Declares the concrete implementation class used by the adapter.
- *
- * This decorator stores the implementation class in class metadata, which is read
- * at runtime by the Adapter base class's register() and registerAsync() methods.
- *
- * @param implementation - The concrete implementation class that provides the port functionality
- *
- * @example
- * ```typescript
- * @AdapterToken(OBJECT_STORAGE_PROVIDER)
- * @AdapterImpl(S3ObjectStorageService)
- * class S3Adapter extends Adapter<S3Options> {}
- * ```
- */
-export function AdapterImpl(implementation: Type<unknown>): ClassDecorator {
-	return (target: unknown) => {
+export function Port<C extends PortConfig<any, any>>(config: {
+	token: C['token']
+	implementation: Type<C['port']>
+}): ClassDecorator {
+	return (target) => {
+		Reflect.defineMetadata(PORT_TOKEN_METADATA, config.token, target)
 		Reflect.defineMetadata(
-			ADAPTER_IMPL_METADATA,
-			implementation,
-			target as object,
+			PORT_IMPLEMENTATION_METADATA,
+			config.implementation,
+			target,
 		)
 	}
 }
@@ -61,7 +49,7 @@ export function AdapterImpl(implementation: Type<unknown>): ClassDecorator {
  * class ObjectStorageService {
  *   constructor(
  *     @InjectPort(OBJECT_STORAGE_PROVIDER)
- *     private readonly storage: ObjectStorageProvider,
+ *     private readonly storage: ObjectStoragePort,
  *   ) {}
  * }
  * ```

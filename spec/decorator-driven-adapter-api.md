@@ -55,7 +55,7 @@ DX decorator for injecting a port token into services.
 ```ts
 constructor(
   @InjectPort(OBJECT_STORAGE_PROVIDER)
-  private readonly storage: ObjectStorageProvider,
+  private readonly storage: ObjectStoragePort,
 ) {}
 ```
 
@@ -89,7 +89,7 @@ The `Adapter<TToken, TOptions>` base class still:
 - Exports **only the port token**
 - Preserves the typed `AdapterModule<TToken>` proof
 
-The difference:  
+The difference:
 It now **reads metadata from decorators** instead of protected fields.
 
 ---
@@ -104,7 +104,7 @@ export default defineAdapter<typeof OBJECT_STORAGE_PROVIDER, S3AdapterOptions>()
     typeof OBJECT_STORAGE_PROVIDER,
     S3AdapterOptions
   > {
-    protected extraProviders(options: S3AdapterOptions) {
+    protected extraPoviders(options: S3AdapterOptions) {
       return [
         {
           provide: Symbol('S3_INIT'),

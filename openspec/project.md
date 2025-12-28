@@ -53,7 +53,7 @@
 - Tokens: `SCREAMING_SNAKE_CASE` with `Symbol()` preferred (e.g., `OBJECT_STORAGE_PROVIDER`)
 - Classes: `PascalCase` (e.g., `ObjectStorageService`, `S3ObjectStorageAdapter`)
 - Files: `kebab-case.ts` or `feature-name.type.ts` pattern
-- Interfaces: `PascalCase` without `I` prefix (e.g., `ObjectStorageProvider`)
+- Interfaces: `PascalCase` without `I` prefix (e.g., `ObjectStoragePort`)
 
 ### Architecture Patterns
 
@@ -84,7 +84,7 @@
 **Testing Patterns:**
 - **Unit tests:** Test adapter implementations and feature modules in isolation
 - **Mock adapters:** Create test adapters extending `Adapter.forToken()` for easy mocking
-- **Token overrides:** Use `.overrideProvider(TOKEN).useValue(mock)` in Nest testing modules
+- **Token overrides:** Use `.overridePort(TOKEN).useValue(mock)` in Nest testing modules
 - **Type tests:** Verify compile-time type safety for adapter/feature module compatibility
 
 **Coverage Requirements:**
@@ -124,7 +124,7 @@ bun run release  # Bumps version, commits, tags, and pushes
 **Port:** A domain interface (e.g., "object storage") represented by a DI token. Example:
 ```typescript
 export const OBJECT_STORAGE_PROVIDER = Symbol('OBJECT_STORAGE_PROVIDER');
-export interface ObjectStorageProvider {
+export interface ObjectStoragePort {
   putObject(...): Promise<...>;
   getSignedGetUrl(...): Promise<...>;
 }
@@ -141,7 +141,7 @@ import { InjectPort } from '@nestjs-adapters/core';
 
 @Injectable()
 class ObjectStorageService {
-  constructor(@InjectPort(OBJECT_STORAGE_PROVIDER) private storage: ObjectStorageProvider) {}
+  constructor(@InjectPort(OBJECT_STORAGE_PROVIDER) private storage: ObjectStoragePort) {}
 }
 ```
 

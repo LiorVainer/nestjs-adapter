@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import type { Provider, Type } from '@nestjs/common'
-import { ADAPTER_IMPL_METADATA, ADAPTER_TOKEN_METADATA } from './constants'
+import { PORT_IMPLEMENTATION_METADATA, PORT_TOKEN_METADATA } from './constants'
 import type { AdapterModule } from './types'
 
 /**
@@ -8,21 +8,23 @@ import type { AdapterModule } from './types'
  *
  * Adapters are dynamic modules that provide a port token and hide infrastructure details.
  * This base class automatically handles provider registration, token aliasing, and exports
- * by reading metadata from @AdapterToken and @AdapterImpl decorators.
+ * by reading metadata from the @Port decorator.
  *
  * @template TOptions - The options type for configuring this adapter
  *
  * @example
  * ```typescript
- * export default defineAdapter<typeof STORAGE_TOKEN, S3Options>()(
- *   @AdapterToken(STORAGE_TOKEN)
- *   @AdapterImpl(S3Service)
+ * export default defineAdapter<typeof STORAGE_PORT, S3Options>()(
+ *   @Port({
+ *     token: STORAGE_PORT,
+ *     implementation: S3Service
+ *   })
  *   class S3Adapter extends Adapter<S3Options> {
  *     protected imports(options: S3Options) {
  *       return []; // Optional: import other modules
  *     }
  *
- *     protected extraProviders(options: S3Options) {
+ *     protected extraPoviders(options: S3Options) {
  *       return []; // Optional: additional providers
  *     }
  *   }
@@ -48,17 +50,17 @@ export class Adapter<TOptions> {
 	 * @param _options - The adapter configuration options
 	 * @returns Array of additional providers
 	 */
-	protected extraProviders(_options: TOptions): Provider[] {
+	protected extraPoviders(_options: TOptions): Provider[] {
 		return []
 	}
 
 	/**
 	 * Synchronous registration method.
-	 * Creates a dynamic module with the adapter's token and implementation.
+	 * Creates a dynamic module with the adapter's port token and implementation.
 	 *
 	 * @param options - The adapter configuration options
 	 * @returns An AdapterModule with compile-time token proof
-	 * @throws Error if @AdapterToken or @AdapterImpl decorators are missing
+	 * @throws Error if @Port decorator is missing or incomplete
 	 */
 	static register<TToken, TOptions>(
 		this: new () => Adapter<TOptions>,
@@ -66,18 +68,22 @@ export class Adapter<TOptions> {
 	): AdapterModule<TToken> {
 		const instance = new Adapter()
 
-		// Read metadata from decorators
-		const token = Reflect.getMetadata(ADAPTER_TOKEN_METADATA, Adapter) as TToken
+		// Read metadata from @Port decorator
+		const token = Reflect.getMetadata(PORT_TOKEN_METADATA, Adapter) as TToken
 		const implementation = Reflect.getMetadata(
-			ADAPTER_IMPL_METADATA,
+			PORT_IMPLEMENTATION_METADATA,
 			Adapter,
 		) as Type<unknown>
 
 		if (!token) {
-			throw new Error(`${Adapter.name} must be decorated with @AdapterToken()`)
+			throw new Error(
+				`${Adapter.name} must be decorated with @Port() and specify 'token'`,
+			)
 		}
 		if (!implementation) {
-			throw new Error(`${Adapter.name} must be decorated with @AdapterImpl()`)
+			throw new Error(
+				`${Adapter.name} must be decorated with @Port() and specify 'implementation'`,
+			)
 		}
 
 		return {
@@ -86,7 +92,7 @@ export class Adapter<TOptions> {
 			providers: [
 				implementation,
 				{ provide: token as never, useExisting: implementation },
-				...instance.extraProviders(options),
+				...instance.extraPoviders(options),
 			],
 			exports: [token as never],
 			__provides: token,
@@ -99,7 +105,7 @@ export class Adapter<TOptions> {
 	 *
 	 * @param options - Async configuration with factory, imports, and inject
 	 * @returns An AdapterModule with compile-time token proof
-	 * @throws Error if @AdapterToken or @AdapterImpl decorators are missing
+	 * @throws Error if @Port decorator is missing or incomplete
 	 *
 	 * @example
 	 * ```typescript
@@ -120,18 +126,22 @@ export class Adapter<TOptions> {
 	): AdapterModule<TToken> {
 		const instance = new Adapter()
 
-		// Read metadata from decorators
-		const token = Reflect.getMetadata(ADAPTER_TOKEN_METADATA, Adapter) as TToken
+		// Read metadata from @Port decorator
+		const token = Reflect.getMetadata(PORT_TOKEN_METADATA, Adapter) as TToken
 		const implementation = Reflect.getMetadata(
-			ADAPTER_IMPL_METADATA,
+			PORT_IMPLEMENTATION_METADATA,
 			Adapter,
 		) as Type<unknown>
 
 		if (!token) {
-			throw new Error(`${Adapter.name} must be decorated with @AdapterToken()`)
+			throw new Error(
+				`${Adapter.name} must be decorated with @Port() and specify 'token'`,
+			)
 		}
 		if (!implementation) {
-			throw new Error(`${Adapter.name} must be decorated with @AdapterImpl()`)
+			throw new Error(
+				`${Adapter.name} must be decorated with @Port() and specify 'implementation'`,
+			)
 		}
 
 		return {
@@ -140,7 +150,7 @@ export class Adapter<TOptions> {
 			providers: [
 				implementation,
 				{ provide: token as never, useExisting: implementation },
-				...instance.extraProviders({} as TOptions),
+				...instance.extraPoviders({} as TOptions),
 			],
 			exports: [token as never],
 			__provides: token,

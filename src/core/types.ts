@@ -18,3 +18,8 @@ import type { DynamicModule } from '@nestjs/common'
 export type AdapterModule<TToken> = DynamicModule & {
 	__provides: TToken
 }
+
+export type PortConfig<Token, Port> = {
+	token: Token
+	port: Port
+}

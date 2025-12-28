@@ -85,7 +85,7 @@ The library SHALL provide an abstract `Adapter<TOptions>` base class for buildin
 - **WHEN** an adapter needs to import other NestJS modules
 - **THEN** it MAY override the `imports(options?: TOptions): any[]` method
 - **WHEN** an adapter needs additional providers
-- **THEN** it MAY override the `extraProviders(options: TOptions): Provider[]` method
+- **THEN** it MAY override the `extraPoviders(options: TOptions): Port[]` method
 
 #### Scenario: No abstract properties
 - **WHEN** a class extends `Adapter<TOptions>`
@@ -126,7 +126,7 @@ The Adapter class SHALL provide a static `register()` method that reads token an
 - **THEN** the returned module SHALL include `HttpModule` in imports
 
 #### Scenario: With extra providers
-- **WHEN** adapter overrides `extraProviders(options)` returning additional providers
+- **WHEN** adapter overrides `extraPoviders(options)` returning additional providers
 - **AND** `MyAdapter.register(options)` is called
 - **THEN** the returned module SHALL include those providers
 
@@ -195,7 +195,7 @@ The library SHALL provide an abstract `FeatureModule<TService, TToken>` base cla
   - Provides the service class
   - Exports the service class
 
-### Requirement: Provider Registration Pattern
+### Requirement: Port Registration Pattern
 
 The Adapter base class SHALL automatically handle provider registration following NestJS best practices.
 

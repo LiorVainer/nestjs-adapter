@@ -4,8 +4,8 @@ A tiny, **class-based**, **NestJS-native** helper library for building **pluggab
 
 This package standardizes:
 
-1. **Adapter modules** that provide a “port” token and hide infrastructure details (AWS SDK, HTTP APIs, etc.).
-2. **Feature modules** that accept an adapter module and expose a domain service.
+1. **Adapter modules** that provide a "port" token and hide infrastructure details (AWS SDK, HTTP APIs, etc.).
+2. **Port modules** that accept an adapter module and expose a domain service.
 
 It aims to be:
 - **Declarative**: declare the capability token **once**.
@@ -23,7 +23,7 @@ It aims to be:
 - [Implementation](#implementation)
   - [Types](#types)
   - [Adapter base](#adapter-base)
-  - [Feature module base](#feature-module-base)
+  - [Port module base](#port-module-base)
   - [Index exports](#index-exports)
 - [Examples](#examples)
   - [Example A: Object Storage feature module (port)](#example-a-object-storage-feature-module-port)
@@ -64,7 +64,7 @@ export const OBJECT_STORAGE_PROVIDER = Symbol('OBJECT_STORAGE_PROVIDER');
 ### 2) Adapter module
 A module that **provides** the token and hides infrastructure details (AWS clients, HTTP clients, auth headers, etc.).
 
-### 3) Feature module
+### 3) Port module
 A module that imports an adapter module and exposes a **domain service**.
 
 ---
@@ -78,11 +78,10 @@ Suggested exports:
 
 - **Base Classes:**
   - `Adapter` — base class to build adapter modules with minimal repetition.
-  - `FeatureModule` — base class to build feature modules that accept adapters.
+  - `PortModule` — base class to build port modules that accept adapters.
 
 - **Decorators:**
-  - `@AdapterToken(token)` — Declares which port token the adapter provides.
-  - `@AdapterImpl(ImplementationClass)` — Declares the concrete implementation class.
+  - `@Port({ token, implementation })` — Declares which port token the adapter provides and its implementation class.
   - `@InjectPort(token)` — DX decorator for injecting a port token into services.
 
 - **Helpers:**
@@ -114,8 +113,7 @@ export type AdapterModule<TToken> = DynamicModule & {
 ### Adapter base
 
 Goals:
-- Declare the capability token **once** using `@AdapterToken` decorator
-- Declare the concrete implementation **once** using `@AdapterImpl` decorator
+- Declare the capability token **once** using `@Port({ token, implementation })` decorator
 - Automatically:
   - register the implementation class
   - alias token -> implementation (`useExisting`)
@@ -125,9 +123,10 @@ Goals:
 
 ```ts
 // src/core/adapter.base.ts
-import { Provider, Type } from '@nestjs/common';
+import 'reflect-metadata';
+import { Port, Type } from '@nestjs/common';
 import { AdapterModule } from './types';
-import { ADAPTER_TOKEN_METADATA, ADAPTER_IMPL_METADATA } from './constants';
+import { PORT_TOKEN_METADATA, PORT_IMPLEMENTATION_METADATA } from './constants';
 
 export abstract class Adapter<TOptions> {
   /** Optional imports (can depend on options) */
@@ -136,7 +135,7 @@ export abstract class Adapter<TOptions> {
   }
 
   /** Optional extra providers (e.g., helper tokens, loggers, mappers) */
-  protected extraProviders(_options: TOptions): Provider[] {
+  protected extraPoviders(_options: TOptions): Port[] {
     return [];
   }
 
@@ -149,15 +148,15 @@ export abstract class Adapter<TOptions> {
   ): AdapterModule<TToken> {
     const instance = new this();
 
-    // Read metadata from decorators
-    const token = Reflect.getMetadata(ADAPTER_TOKEN_METADATA, this) as TToken;
-    const implementation = Reflect.getMetadata(ADAPTER_IMPL_METADATA, this) as Type<unknown>;
+    // Read metadata from @Port decorator
+    const token = Reflect.getMetadata(PORT_TOKEN_METADATA, this) as TToken;
+    const implementation = Reflect.getMetadata(PORT_IMPLEMENTATION_METADATA, this) as Type<unknown>;
 
     if (!token) {
-      throw new Error(`${this.name} must be decorated with @AdapterToken()`);
+      throw new Error(`${this.name} must be decorated with @Port() and specify 'token'`);
     }
     if (!implementation) {
-      throw new Error(`${this.name} must be decorated with @AdapterImpl()`);
+      throw new Error(`${this.name} must be decorated with @Port() and specify 'implementation'`);
     }
 
     return {
@@ -166,7 +165,7 @@ export abstract class Adapter<TOptions> {
       providers: [
         implementation,
         { provide: token, useExisting: implementation },
-        ...instance.extraProviders(options),
+        ...instance.extraPoviders(options),
       ],
       exports: [token],
       __provides: token,
@@ -179,7 +178,7 @@ export abstract class Adapter<TOptions> {
    * NOTE: The base version does not auto-create an options token.
    * If your adapter needs DI-resolved options, you can:
    * 1) Keep the adapter options sync (recommended), OR
-   * 2) Add an adapter-specific options token + provider in `extraProviders()`,
+   * 2) Add an adapter-specific options token + provider in `extraPoviders()`,
    *    and configure imports (like HttpModule.registerAsync) there.
    */
   static registerAsync<TToken, TOptions>(
@@ -192,15 +191,15 @@ export abstract class Adapter<TOptions> {
   ): AdapterModule<TToken> {
     const instance = new this();
 
-    // Read metadata from decorators
-    const token = Reflect.getMetadata(ADAPTER_TOKEN_METADATA, this) as TToken;
-    const implementation = Reflect.getMetadata(ADAPTER_IMPL_METADATA, this) as Type<unknown>;
+    // Read metadata from @Port decorator
+    const token = Reflect.getMetadata(PORT_TOKEN_METADATA, this) as TToken;
+    const implementation = Reflect.getMetadata(PORT_IMPLEMENTATION_METADATA, this) as Type<unknown>;
 
     if (!token) {
-      throw new Error(`${this.name} must be decorated with @AdapterToken()`);
+      throw new Error(`${this.name} must be decorated with @Port() and specify 'token'`);
     }
     if (!implementation) {
-      throw new Error(`${this.name} must be decorated with @AdapterImpl()`);
+      throw new Error(`${this.name} must be decorated with @Port() and specify 'implementation'`);
     }
 
     return {
@@ -212,7 +211,7 @@ export abstract class Adapter<TOptions> {
       providers: [
         implementation,
         { provide: token, useExisting: implementation },
-        ...instance.extraProviders({} as TOptions),
+        ...instance.extraPoviders({} as TOptions),
       ],
       exports: [token],
       __provides: token,
@@ -227,8 +226,17 @@ export abstract class Adapter<TOptions> {
 
 ```ts
 // src/core/constants.ts
-export const ADAPTER_TOKEN_METADATA = Symbol('ADAPTER_TOKEN_METADATA');
-export const ADAPTER_IMPL_METADATA = Symbol('ADAPTER_IMPL_METADATA');
+/**
+ * Metadata key for storing the port token in adapter class metadata.
+ * Used by the @Port decorator to store which token the adapter provides.
+ */
+export const PORT_TOKEN_METADATA: unique symbol = Symbol('PORT_TOKEN_METADATA');
+
+/**
+ * Metadata key for storing the port implementation class in adapter class metadata.
+ * Used by the @Port decorator to store the concrete implementation class.
+ */
+export const PORT_IMPLEMENTATION_METADATA: unique symbol = Symbol('PORT_IMPLEMENTATION_METADATA');
 ```
 
 ---
@@ -237,48 +245,62 @@ export const ADAPTER_IMPL_METADATA = Symbol('ADAPTER_IMPL_METADATA');
 
 ```ts
 // src/core/decorators.ts
-import { Inject } from '@nestjs/common';
-import { Type } from '@nestjs/common';
-import { ADAPTER_TOKEN_METADATA, ADAPTER_IMPL_METADATA } from './constants';
+import 'reflect-metadata';
+import { Inject, Type } from '@nestjs/common';
+import { PORT_TOKEN_METADATA, PORT_IMPLEMENTATION_METADATA } from './constants';
 
 /**
- * Declares which port token the adapter provides.
+ * Declares the port configuration for an adapter (token and implementation).
+ *
+ * This decorator stores both the port token and implementation class in metadata,
+ * which is read at runtime by the Adapter base class's register() and registerAsync() methods.
+ *
+ * @param config - Port configuration object
+ * @param config.token - The port token this adapter provides
+ * @param config.implementation - The concrete implementation class that provides the port functionality
  *
  * @example
- * @AdapterToken(OBJECT_STORAGE_PROVIDER)
+ * ```typescript
+ * @Port({
+ *   token: OBJECT_STORAGE_PROVIDER,
+ *   implementation: S3ObjectStorageService
+ * })
  * class S3Adapter extends Adapter<S3Options> {}
+ * ```
  */
-export function AdapterToken<TToken>(token: TToken): ClassDecorator {
-  return (target: any) => {
-    Reflect.defineMetadata(ADAPTER_TOKEN_METADATA, token, target);
+export function Port<TToken>(config: {
+  token: TToken;
+  implementation: Type<unknown>;
+}): ClassDecorator {
+  return (target: unknown) => {
+    Reflect.defineMetadata(PORT_TOKEN_METADATA, config.token, target as object);
+    Reflect.defineMetadata(
+      PORT_IMPLEMENTATION_METADATA,
+      config.implementation,
+      target as object,
+    );
   };
 }
 
 /**
- * Declares the concrete implementation class used by the adapter.
+ * DX decorator for injecting a port token into service constructors.
+ * This is a shorthand for @Inject(token) that provides clearer semantics.
+ *
+ * @param token - The port token to inject
  *
  * @example
- * @AdapterImpl(S3ObjectStorageService)
- * class S3Adapter extends Adapter<S3Options> {}
- */
-export function AdapterImpl(implementation: Type<unknown>): ClassDecorator {
-  return (target: any) => {
-    Reflect.defineMetadata(ADAPTER_IMPL_METADATA, implementation, target);
-  };
-}
-
-/**
- * DX decorator for injecting a port token into services.
- * Shorthand for @Inject(TOKEN).
- *
- * @example
- * constructor(
- *   @InjectPort(OBJECT_STORAGE_PROVIDER)
- *   private readonly storage: ObjectStorageProvider,
- * ) {}
+ * ```typescript
+ * @Injectable()
+ * class ObjectStorageService {
+ *   constructor(
+ *     @InjectPort(OBJECT_STORAGE_PROVIDER)
+ *     private readonly storage: ObjectStoragePort,
+ *   ) {}
+ * }
+ * ```
  */
 export function InjectPort<TToken>(token: TToken): ParameterDecorator {
-  return Inject(token);
+  return Inject(token as never);
 }
 ```
 
@@ -297,11 +319,15 @@ import { AdapterModule } from './types';
  * After TypeScript compilation, this helper is erased completely.
  *
  * @example
+ * ```typescript
  * export default defineAdapter<typeof STORAGE_TOKEN, S3Options>()(
- *   @AdapterToken(STORAGE_TOKEN)
- *   @AdapterImpl(S3Service)
+ *   @Port({
+ *     token: STORAGE_TOKEN,
+ *     implementation: S3Service
+ *   })
  *   class S3Adapter extends Adapter<S3Options> {}
  * );
+ * ```
  */
 export function defineAdapter<TToken, TOptions>() {
   return <T extends new () => Adapter<TOptions>>(adapterClass: T): T & {
@@ -319,32 +345,45 @@ export function defineAdapter<TToken, TOptions>() {
 
 ---
 
-### Feature module base
+### Port module base
 
 Goals:
-- Class-based feature module that:
+- Class-based port module that:
   - has `@Module()` metadata
   - exposes a single domain service
   - imports the chosen adapter module
 
 ```ts
-// src/core/feature-module.base.ts
-import { DynamicModule, Module, Type } from '@nestjs/common';
+// src/core/port-module.base.ts
+import { DynamicModule, Module } from '@nestjs/common';
 import { AdapterModule } from './types';
 
+/**
+ * Abstract base class for building port modules that consume adapters.
+ *
+ * Port modules are domain-focused modules that:
+ * - Accept an adapter module as a dependency
+ * - Expose a domain service that uses the port token
+ * - Remain independent of infrastructure details
+ *
+ * @template TService - The domain service type (for documentation only)
+ *
+ * @example
+ * ```typescript
+ * @Module({})
+ * export class ObjectStorageModule extends PortModule<typeof ObjectStorageService> {}
+ * ```
+ */
 @Module({})
-export abstract class FeatureModule<TService, TToken> {
-  protected static service: Type<any>;
-
-  static register<TToken>(
-    this: { service: Type<any> },
-    options: { adapter: AdapterModule<TToken> },
-  ): DynamicModule {
+export class PortModule<_TService> {
+  static register<TToken>({
+    adapter,
+  }: {
+    adapter?: AdapterModule<TToken>;
+  }): DynamicModule {
     return {
-      module: this as any,
-      imports: [options.adapter],
-      providers: [this.service],
-      exports: [this.service],
+      module: PortModule,
+      imports: adapter ? [adapter] : [],
     };
   }
 }
@@ -357,10 +396,10 @@ export abstract class FeatureModule<TService, TToken> {
 ```ts
 // src/index.ts
 export { Adapter } from './core/adapter.base';
-export { FeatureModule } from './core/feature-module.base';
-export type { AdapterModule } from './core/types';
-export { AdapterToken, AdapterImpl, InjectPort } from './core/decorators';
+export { InjectPort, Port } from './core/decorators';
 export { defineAdapter } from './core/define-adapter';
+export { PortModule } from './core/port-module.base';
+export type { AdapterModule } from './core/types';
 ```
 
 ---
@@ -382,7 +421,7 @@ The examples below show **one AWS adapter** (S3) and **one HTTP adapter** (curre
 export const OBJECT_STORAGE_PROVIDER = Symbol('OBJECT_STORAGE_PROVIDER');
 
 // libs/storage/src/object-storage.port.ts
-export interface ObjectStorageProvider {
+export interface ObjectStoragePort {
   putObject(input: {
     bucket: string;
     key: string;
@@ -405,13 +444,13 @@ export interface ObjectStorageProvider {
 import { Injectable } from '@nestjs/common';
 import { InjectPort } from '@nestjs-adapters/core';
 import { OBJECT_STORAGE_PROVIDER } from './object-storage.token';
-import type { ObjectStorageProvider } from './object-storage.port';
+import type { ObjectStoragePort } from './object-storage.port';
 
 @Injectable()
 export class ObjectStorageService {
   constructor(
     @InjectPort(OBJECT_STORAGE_PROVIDER)
-    private readonly storage: ObjectStorageProvider,
+    private readonly storage: ObjectStoragePort,
   ) {}
 
   uploadProfilePhoto(input: { userId: string; image: Buffer }) {
@@ -436,20 +475,16 @@ export class ObjectStorageService {
 }
 ```
 
-#### Feature module (accepts adapter)
+#### Port module (accepts adapter)
 
 ```ts
 // libs/storage/src/object-storage.module.ts
-import { FeatureModule } from '@nestjs-adapters/core';
+import { Module } from '@nestjs/common';
+import { PortModule } from '@nestjs-adapters/core';
 import { ObjectStorageService } from './object-storage.service';
-import { OBJECT_STORAGE_PROVIDER } from './object-storage.token';
 
-export class ObjectStorageModule extends FeatureModule<
-  ObjectStorageService,
-  typeof OBJECT_STORAGE_PROVIDER
-> {
-  protected static service = ObjectStorageService;
-}
+@Module({})
+export class ObjectStorageModule extends PortModule<typeof ObjectStorageService> {}
 ```
 
 ---
@@ -538,42 +573,48 @@ export class S3ObjectStorageService {
 
 ```ts
 // libs/storage/src/adapters/s3/s3.adapter.ts
-import { Adapter, AdapterToken, AdapterImpl, defineAdapter } from '@nestjs-adapters/core';
+import { Adapter, Port, defineAdapter } from '@nestjs-adapters/core';
 import { OBJECT_STORAGE_PROVIDER } from '../../object-storage.token';
 import type { S3AdapterOptions } from './s3.types';
 import { S3ObjectStorageService } from './s3.service';
 
-export default defineAdapter<typeof OBJECT_STORAGE_PROVIDER, S3AdapterOptions>()(
-  @AdapterToken(OBJECT_STORAGE_PROVIDER)
-  @AdapterImpl(S3ObjectStorageService)
-  class S3ObjectStorageAdapter extends Adapter<S3AdapterOptions> {
-    /**
-     * Use imports() if you need to import other Nest modules.
-     * AWS SDK clients usually don't require Nest imports.
-     */
-    protected imports(_options?: S3AdapterOptions) {
-      return [];
-    }
+@Port({
+  token: OBJECT_STORAGE_PROVIDER,
+  implementation: S3ObjectStorageService,
+})
+class S3AdapterClass extends Adapter<S3AdapterOptions> {
+  /**
+   * Use imports() if you need to import other Nest modules.
+   * AWS SDK clients usually don't require Nest imports.
+   */
+  protected imports(_options?: S3AdapterOptions) {
+    return [];
+  }
 
-    protected extraProviders(options: S3AdapterOptions) {
-      // Initialize the AWS client after Nest constructs the service.
-      // This uses a provider that runs once and calls `init()`.
-      return [
-        {
-          provide: Symbol('S3_INIT'),
-          useFactory: (svc: S3ObjectStorageService) => {
-            svc.init(options);
-            return true;
-          },
-          inject: [S3ObjectStorageService],
+  protected extraPoviders(options: S3AdapterOptions) {
+    // Initialize the AWS client after Nest constructs the service.
+    // This uses a provider that runs once and calls `init()`.
+    return [
+      {
+        provide: Symbol('S3_INIT'),
+        useFactory: (svc: S3ObjectStorageService) => {
+          svc.init(options);
+          return true;
         },
-      ];
-    }
-  },
+        inject: [S3ObjectStorageService],
+      },
+    ];
+  }
+}
+
+const S3Adapter = defineAdapter<typeof OBJECT_STORAGE_PROVIDER, S3AdapterOptions>()(
+  S3AdapterClass,
 );
+
+export default S3Adapter;
 ```
 
-> Tip: In a “real” adapter, you may prefer to inject an options token into `S3ObjectStorageService` rather than calling `init()`. Both are valid; this keeps the example concise.
+> Tip: In a "real" adapter, you may prefer to inject an options token into `S3ObjectStorageService` rather than calling `init()`. Both are valid; this keeps the example concise.
 
 ---
 
@@ -586,7 +627,7 @@ export default defineAdapter<typeof OBJECT_STORAGE_PROVIDER, S3AdapterOptions>()
 export const CURRENCY_RATES_PROVIDER = Symbol('CURRENCY_RATES_PROVIDER');
 
 // libs/rates/src/currency-rates.port.ts
-export interface CurrencyRatesProvider {
+export interface CurrencyRatesPort {
   getRate(input: { base: string; quote: string }): Promise<{ rate: number }>;
 }
 ```
@@ -598,13 +639,13 @@ export interface CurrencyRatesProvider {
 import { Injectable } from '@nestjs/common';
 import { InjectPort } from '@nestjs-adapters/core';
 import { CURRENCY_RATES_PROVIDER } from './currency-rates.token';
-import type { CurrencyRatesProvider } from './currency-rates.port';
+import type { CurrencyRatesPort } from './currency-rates.port';
 
 @Injectable()
 export class CurrencyRatesService {
   constructor(
     @InjectPort(CURRENCY_RATES_PROVIDER)
-    private readonly provider: CurrencyRatesProvider,
+    private readonly provider: CurrencyRatesPort,
   ) {}
 
   async convert(input: { amount: number; base: string; quote: string }) {
@@ -614,20 +655,16 @@ export class CurrencyRatesService {
 }
 ```
 
-#### Feature module
+#### Port module
 
 ```ts
 // libs/rates/src/currency-rates.module.ts
-import { FeatureModule } from '@nestjs-adapters/core';
+import { Module } from '@nestjs/common';
+import { PortModule } from '@nestjs-adapters/core';
 import { CurrencyRatesService } from './currency-rates.service';
-import { CURRENCY_RATES_PROVIDER } from './currency-rates.token';
 
-export class CurrencyRatesModule extends FeatureModule<
-  CurrencyRatesService,
-  typeof CURRENCY_RATES_PROVIDER
-> {
-  protected static service = CurrencyRatesService;
-}
+@Module({})
+export class CurrencyRatesModule extends PortModule<typeof CurrencyRatesService> {}
 ```
 
 #### HTTP adapter options
@@ -672,26 +709,32 @@ export class HttpCurrencyRatesService {
 ```ts
 // libs/rates/src/adapters/http/http-rates.adapter.ts
 import { HttpModule } from '@nestjs/axios';
-import { Adapter, AdapterToken, AdapterImpl, defineAdapter } from '@nestjs-adapters/core';
+import { Adapter, Port, defineAdapter } from '@nestjs-adapters/core';
 import { CURRENCY_RATES_PROVIDER } from '../../currency-rates.token';
 import type { HttpRatesOptions } from './http-rates.types';
 import { HttpCurrencyRatesService } from './http-rates.service';
 
-export default defineAdapter<typeof CURRENCY_RATES_PROVIDER, HttpRatesOptions>()(
-  @AdapterToken(CURRENCY_RATES_PROVIDER)
-  @AdapterImpl(HttpCurrencyRatesService)
-  class HttpCurrencyRatesAdapter extends Adapter<HttpRatesOptions> {
-    protected imports(options?: HttpRatesOptions) {
-      return [
-        HttpModule.register({
-          baseURL: options?.baseUrl,
-          timeout: options?.timeoutMs ?? 10_000,
-          headers: options?.apiKey ? { 'x-api-key': options.apiKey } : undefined,
-        }),
-      ];
-    }
-  },
+@Port({
+  token: CURRENCY_RATES_PROVIDER,
+  implementation: HttpCurrencyRatesService,
+})
+class HttpRatesAdapterClass extends Adapter<HttpRatesOptions> {
+  protected imports(options?: HttpRatesOptions) {
+    return [
+      HttpModule.register({
+        baseURL: options?.baseUrl,
+        timeout: options?.timeoutMs ?? 10_000,
+        headers: options?.apiKey ? { 'x-api-key': options.apiKey } : undefined,
+      }),
+    ];
+  }
+}
+
+const HttpRatesAdapter = defineAdapter<typeof CURRENCY_RATES_PROVIDER, HttpRatesOptions>()(
+  HttpRatesAdapterClass,
 );
+
+export default HttpRatesAdapter;
 ```
 
 ---
@@ -741,19 +784,23 @@ export class AppModule {}
 Mock adapter:
 
 ```ts
-import { Adapter, AdapterToken, AdapterImpl, defineAdapter } from '@nestjs-adapters/core';
+import { Adapter, Port, defineAdapter } from '@nestjs-adapters/core';
 import { CURRENCY_RATES_PROVIDER } from './currency-rates.token';
 
-class MockRatesProvider {
+class MockRatesPort {
   async getRate() {
     return { rate: 2 };
   }
 }
 
+@Port({
+  token: CURRENCY_RATES_PROVIDER,
+  implementation: MockRatesPort,
+})
+class MockRatesAdapterClass extends Adapter<void> {}
+
 const MockRatesAdapter = defineAdapter<typeof CURRENCY_RATES_PROVIDER, void>()(
-  @AdapterToken(CURRENCY_RATES_PROVIDER)
-  @AdapterImpl(MockRatesProvider)
-  class MockRatesAdapter extends Adapter<void> {},
+  MockRatesAdapterClass,
 );
 
 CurrencyRatesModule.register({
@@ -764,7 +811,7 @@ CurrencyRatesModule.register({
 Or override the token in Nest testing module:
 
 ```ts
-.overrideProvider(CURRENCY_RATES_PROVIDER)
+.overridePort(CURRENCY_RATES_PROVIDER)
 .useValue({ getRate: jest.fn().mockResolvedValue({ rate: 2 }) })
 ```
 

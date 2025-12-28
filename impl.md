@@ -90,7 +90,7 @@ export abstract class Adapter<TToken, TOptions> {
   }
 
   /** Optional extra providers (e.g., helper tokens, loggers, mappers) */
-  protected extraProviders(_options: TOptions): Provider[] {
+  protected extraPoviders(_options: TOptions): Port[] {
     return [];
   }
 
@@ -117,7 +117,7 @@ export abstract class Adapter<TToken, TOptions> {
   - ✅ Subclass of `Adapter.forToken(TOKEN)` has access to `token` property
   - ✅ Abstract methods (`implementation`) must be implemented by subclasses
   - ✅ `imports()` returns empty array by default
-  - ✅ `extraProviders()` returns empty array by default
+  - ✅ `extraPoviders()` returns empty array by default
 
 **Validation**:
 ```bash
@@ -153,7 +153,7 @@ static register<TToken, TOptions>(
     providers: [
       instance.implementation,
       { provide: instance.token, useExisting: instance.implementation },
-      ...instance.extraProviders(options),
+      ...instance.extraPoviders(options),
     ],
     exports: [instance.token],
     __provides: instance.token,
@@ -169,7 +169,7 @@ static register<TToken, TOptions>(
   - ✅ `register()` exports only the token (not the provider object)
   - ✅ `register()` includes `__provides` field with the token
   - ✅ `register()` calls `imports()` with options and includes the result
-  - ✅ `register()` calls `extraProviders()` with options and includes the result
+  - ✅ `register()` calls `extraPoviders()` with options and includes the result
   - ✅ Type safety: returned module is typed as `AdapterModule<TToken>`
 
 **Validation**:
@@ -197,7 +197,7 @@ Add the `registerAsync()` static method to the `Adapter` class:
  * NOTE: The base version does not auto-create an options token.
  * If your adapter needs DI-resolved options, you can:
  * 1) Keep the adapter options sync (recommended), OR
- * 2) Add an adapter-specific options token + provider in `extraProviders()`,
+ * 2) Add an adapter-specific options token + provider in `extraPoviders()`,
  *    and configure imports (like HttpModule.registerAsync) there.
  */
 static registerAsync<TToken, TOptions>(
@@ -219,7 +219,7 @@ static registerAsync<TToken, TOptions>(
     providers: [
       instance.implementation,
       { provide: instance.token, useExisting: instance.implementation },
-      ...instance.extraProviders({} as TOptions),
+      ...instance.extraPoviders({} as TOptions),
     ],
     exports: [instance.token],
     __provides: instance.token,
@@ -345,7 +345,7 @@ tsc --noEmit
 **Test scenario**:
 Create a simple "Logger" port with:
 - Token: `LOGGER_PROVIDER`
-- Port interface: `LoggerProvider { log(message: string): void }`
+- Port interface: `LoggerPort { log(message: string): void }`
 - Adapter: `ConsoleLoggerAdapter` (logs to array instead of console)
 - Feature module: `LoggerModule`
 - Domain service: `LoggerService`
@@ -384,7 +384,7 @@ Create a "Config Storage" adapter with options:
 **Tests to write**:
 - ✅ Adapter `register()` receives and uses options
 - ✅ Options are passed to `imports()`
-- ✅ Options are passed to `extraProviders()`
+- ✅ Options are passed to `extraPoviders()`
 - ✅ Implementation receives configuration correctly
 
 **Validation**:
@@ -418,7 +418,7 @@ bun test tests/integration/adapter-with-imports.test.ts
 
 ---
 
-### Step 10: Integration Testing - Extra Providers
+### Step 10: Integration Testing - Extra Ports
 
 **Goal**: Test adapters that provide additional providers beyond the main implementation.
 
@@ -432,7 +432,7 @@ Create an adapter with extra providers:
 - Verify both providers are registered
 
 **Tests to write**:
-- ✅ `extraProviders()` result is included in providers array
+- ✅ `extraPoviders()` result is included in providers array
 - ✅ Extra providers can inject the main implementation
 - ✅ Extra providers are instantiated correctly
 
@@ -478,7 +478,7 @@ tsc --noEmit
 **Test scenario**:
 Implement a simplified version of the Object Storage example:
 - Token: `OBJECT_STORAGE_PROVIDER`
-- Port: `ObjectStorageProvider` with `putObject()` and `getSignedGetUrl()`
+- Port: `ObjectStoragePort` with `putObject()` and `getSignedGetUrl()`
 - Mock adapter: `MockS3Adapter`
 - Feature module: `ObjectStorageModule`
 - Service: `ObjectStorageService` with `uploadProfilePhoto()`
@@ -506,7 +506,7 @@ bun test tests/integration/realistic-storage.test.ts
 **Test scenario**:
 Show two ways to mock adapters in tests:
 1. Create a `MockAdapter` class and use it in `FeatureModule.register()`
-2. Use NestJS `.overrideProvider()` to replace the token with a mock
+2. Use NestJS `.overridePort()` to replace the token with a mock
 
 **Tests to write**:
 - ✅ Mock adapter approach works

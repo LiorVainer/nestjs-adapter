@@ -22,7 +22,7 @@
 ## 4. Adapter Base Class
 - [x] 4.1 Create `src/core/adapter.base.ts` with abstract `Adapter<TOptions>` class (only generic over TOptions, not TToken)
 - [x] 4.2 Implement optional `imports()` method for module imports
-- [x] 4.3 Implement optional `extraProviders()` method for additional providers
+- [x] 4.3 Implement optional `extraPoviders()` method for additional providers
 - [x] 4.4 Implement static `register<TToken, TOptions>()` method that reads decorator metadata
 - [x] 4.5 Add runtime validation in `register()` (throw if decorators missing)
 - [x] 4.6 Implement static `registerAsync<TToken, TOptions>()` method that reads decorator metadata

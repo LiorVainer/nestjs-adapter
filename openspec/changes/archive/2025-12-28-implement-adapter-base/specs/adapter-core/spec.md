@@ -29,7 +29,7 @@ The library SHALL provide an abstract `Adapter<TToken, TOptions>` base class for
 - **WHEN** an adapter needs to import other NestJS modules
 - **THEN** it MAY override the `imports(options?: TOptions): any[]` method
 - **WHEN** an adapter needs additional providers
-- **THEN** it MAY override the `extraProviders(options: TOptions): Provider[]` method
+- **THEN** it MAY override the `extraPoviders(options: TOptions): Port[]` method
 
 ### Requirement: Synchronous Registration
 
@@ -49,7 +49,7 @@ The Adapter class SHALL provide a static `register()` method for synchronous con
 - **THEN** the returned module SHALL include `HttpModule` in imports
 
 #### Scenario: With extra providers
-- **WHEN** adapter overrides `extraProviders(options)` returning additional providers
+- **WHEN** adapter overrides `extraPoviders(options)` returning additional providers
 - **AND** `MyAdapter.register(options)` is called
 - **THEN** the returned module SHALL include those providers
 
@@ -97,7 +97,7 @@ The Adapter class SHALL provide a static `forToken()` helper for declarative tok
 - **THEN** each adapter SHALL provide the same token independently
 - **AND** apps MAY choose which adapter implementation to use
 
-### Requirement: Provider Registration Pattern
+### Requirement: Port Registration Pattern
 
 The Adapter base class SHALL automatically handle provider registration following NestJS best practices.
 

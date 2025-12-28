@@ -39,7 +39,7 @@ This is the core foundation of the `@nestjs-adapters/core` library. The Adapter 
 - Enables inheritance-based API (natural for class-based NestJS modules)
 - Static methods (`register()`, `registerAsync()`, `forToken()`) provide clean API
 - Abstract properties enforce required configuration (token, implementation)
-- Allows optional hooks (`imports()`, `extraProviders()`) for customization
+- Allows optional hooks (`imports()`, `extraPoviders()`) for customization
 
 **Alternatives considered:**
 - Function factories: Rejected - less natural for NestJS, harder to extend
@@ -76,13 +76,13 @@ This is the core foundation of the `@nestjs-adapters/core` library. The Adapter 
 - Decorator: Rejected - doesn't fit NestJS dynamic module pattern
 - Manual token property: Works but verbose, easy to forget
 
-### Decision 4: Optional `imports()` and `extraProviders()` Hooks
+### Decision 4: Optional `imports()` and `extraPoviders()` Hooks
 
 **What:** Protected methods that adapters can override to customize module configuration.
 
 **Why:**
 - `imports()`: Allows adapters to import other NestJS modules (e.g., HttpModule, ConfigModule)
-- `extraProviders()`: Enables initialization logic, helper services, options providers
+- `extraPoviders()`: Enables initialization logic, helper services, options providers
 - Optional: Most adapters won't need them, but power users can extend behavior
 - Receives options as parameter for dynamic configuration
 
@@ -104,14 +104,14 @@ This is the core foundation of the `@nestjs-adapters/core` library. The Adapter 
 - Both return `AdapterModule<TToken>` for type safety
 
 **Implementation note:**
-- `registerAsync()` passes empty options `{}` to `extraProviders()` in base implementation
-- Adapters needing DI-resolved options should create their own options token in `extraProviders()`
+- `registerAsync()` passes empty options `{}` to `extraPoviders()` in base implementation
+- Adapters needing DI-resolved options should create their own options token in `extraPoviders()`
 
 ## Risks / Trade-offs
 
-### Risk: `registerAsync()` with `extraProviders()` complexity
+### Risk: `registerAsync()` with `extraPoviders()` complexity
 
-**Risk:** Adapters using both `registerAsync()` and `extraProviders()` may need custom options tokens.
+**Risk:** Adapters using both `registerAsync()` and `extraPoviders()` may need custom options tokens.
 
 **Mitigation:**
 - Document pattern in JSDoc comments
