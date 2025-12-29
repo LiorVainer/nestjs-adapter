@@ -1,0 +1,39 @@
+/**
+ * {{namePascal}} Port Module
+ *
+ * This port module provides {{namePascal}} capabilities to the application.
+ * It extends PortModule to accept any adapter that provides {{nameScreamingSnake}}_{{portSuffix}}.
+ *
+ * Key Points:
+ * - Extends PortModule<typeof {{namePascal}}Service>
+ * - Uses register({ adapter }) to accept an adapter module
+ * - Type-safe: only accepts adapters providing {{nameScreamingSnake}}_{{portSuffix}}
+ */
+
+import { Module } from '@nestjs/common'
+import { PortModule } from '{{coreImportPath}}'
+import type { {{namePascal}}Service } from './{{nameKebab}}.service'
+
+/**
+ * Port module for {{namePascal}}.
+ *
+ * Usage:
+ * ```typescript
+ * import { {{namePascal}}Adapter } from './adapters/{{nameKebab}}/{{nameKebab}}.adapter'
+ *
+ * @Module({
+ *   imports: [
+ *     {{namePascal}}Module.register({
+ *       adapter: {{namePascal}}Adapter.register({
+ *         // adapter configuration
+ *       })
+ *     })
+ *   ]
+ * })
+ * class AppModule {}
+ * ```
+ */
+@Module({})
+export class {{namePascal}}Module extends PortModule<
+	typeof {{namePascal}}Service
+> {}

@@ -1,0 +1,42 @@
+/**
+ * {{namePascal}} Domain Service
+ *
+ * This service contains domain logic for {{namePascal}}.
+ * It depends on the {{namePascal}}Port, not on any specific adapter.
+ *
+ * Key Points:
+ * - Injects the port using @InjectPort decorator
+ * - Works with any adapter that implements {{namePascal}}Port
+ * - Contains business logic
+ * - Infrastructure-agnostic
+ */
+
+import { Injectable } from '@nestjs/common'
+import { InjectPort } from '{{coreImportPath}}'
+import type { {{namePascal}}Port } from './{{nameKebab}}.port'
+import { {{nameScreamingSnake}}_{{portSuffix}} } from './{{nameKebab}}.token'
+
+/**
+ * Domain service for {{namePascal}}.
+ */
+@Injectable()
+export class {{namePascal}}Service {
+	private readonly {{nameCamel}}: {{namePascal}}Port
+
+	constructor(
+		@InjectPort({{nameScreamingSnake}}_{{portSuffix}})
+		{{nameCamel}}: {{namePascal}}Port,
+	) {
+		this.{{nameCamel}} = {{nameCamel}}
+	}
+
+	/**
+	 * TODO: Add domain service methods here
+	 *
+	 * Example:
+	 * async processData(id: string): Promise<void> {
+	 *   const data = await this.{{nameCamel}}.getData(id)
+	 *   // Add domain logic here
+	 * }
+	 */
+}

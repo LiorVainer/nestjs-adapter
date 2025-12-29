@@ -94,7 +94,7 @@ export class AdapterGenerator extends BaseGenerator {
 
 		// 1. Adapter class (always generated)
 		const adapterContent = await this.renderTemplate(
-			join(templateDir, 'adapter.ejs'),
+			join(templateDir, 'adapter.hbs'),
 			context,
 		)
 		files.push({
@@ -104,7 +104,7 @@ export class AdapterGenerator extends BaseGenerator {
 
 		// 2. Service implementation (always generated)
 		const serviceContent = await this.renderTemplate(
-			join(templateDir, 'service.ejs'),
+			join(templateDir, 'service.hbs'),
 			context,
 		)
 		files.push({
@@ -114,7 +114,7 @@ export class AdapterGenerator extends BaseGenerator {
 
 		// 3. Types file (always generated)
 		const typesContent = await this.renderTemplate(
-			join(templateDir, 'types.ejs'),
+			join(templateDir, 'types.hbs'),
 			context,
 		)
 		files.push({
@@ -124,7 +124,7 @@ export class AdapterGenerator extends BaseGenerator {
 
 		// 4. Index file (barrel export)
 		const indexContent = await this.renderTemplate(
-			join(templateDir, 'index.ejs'),
+			join(templateDir, 'index.hbs'),
 			context,
 		)
 		files.push({

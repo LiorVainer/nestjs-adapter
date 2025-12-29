@@ -12,6 +12,7 @@ import type {
 	GeneratorResult,
 	NestHexConfig,
 } from '../types'
+import { defaultConfig } from '../config/defaults'
 import { writeFile } from '../utils/file-writer'
 import { generateNameVariations } from '../utils/name-transformer'
 import { resolvePath } from '../utils/path-resolver'
@@ -123,18 +124,24 @@ export abstract class BaseGenerator {
 			namePascal: names.pascal,
 			nameSnake: names.snake,
 			nameScreamingSnake: names.screamingSnake,
-			// Naming configuration
-			portSuffix: this.config.naming?.portSuffix || 'PORT',
-			adapterSuffix: this.config.naming?.adapterSuffix || 'Adapter',
-			fileCase: this.config.naming?.fileCase || 'kebab',
-			// Style configuration
-			indent: this.config.style?.indent || 'tab',
-			quotes: this.config.style?.quotes || 'single',
-			semicolons: this.config.style?.semicolons ?? true,
+			// Naming configuration - use defaults as fallback
+			portSuffix: (this.config.naming?.portSuffix ??
+				defaultConfig.naming.portSuffix) as string,
+			adapterSuffix: (this.config.naming?.adapterSuffix ??
+				defaultConfig.naming.adapterSuffix) as string,
+			fileCase: (this.config.naming?.fileCase ??
+				defaultConfig.naming.fileCase) as 'kebab' | 'camel' | 'pascal',
+			// Style configuration - use defaults as fallback
+			indent: (this.config.style?.indent ??
+				defaultConfig.style.indent) as 'tab' | 2 | 4,
+			quotes: (this.config.style?.quotes ??
+				defaultConfig.style.quotes) as 'single' | 'double',
+			semicolons: (this.config.style?.semicolons ??
+				defaultConfig.style.semicolons) as boolean,
 			// Generator options
 			includeModule: options.includeModule ?? true,
 			includeService: options.includeService ?? true,
-			registrationType: options.registrationType || 'sync',
+			registrationType: options.registrationType ?? 'sync',
 			generateExample: options.generateExample ?? false,
 			// Import paths
 			coreImportPath: 'nest-hex',

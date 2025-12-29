@@ -41,7 +41,7 @@ export class PortGenerator extends BaseGenerator {
 
 		// 1. Port interface (always generated)
 		const interfaceContent = await this.renderTemplate(
-			join(templateDir, 'interface.ejs'),
+			join(templateDir, 'interface.hbs'),
 			context,
 		)
 		files.push({
@@ -51,7 +51,7 @@ export class PortGenerator extends BaseGenerator {
 
 		// 2. Port token (always generated)
 		const tokenContent = await this.renderTemplate(
-			join(templateDir, 'token.ejs'),
+			join(templateDir, 'token.hbs'),
 			context,
 		)
 		files.push({
@@ -62,7 +62,7 @@ export class PortGenerator extends BaseGenerator {
 		// 3. Port service (optional based on includeService option)
 		if (context.includeService) {
 			const serviceContent = await this.renderTemplate(
-				join(templateDir, 'service.ejs'),
+				join(templateDir, 'service.hbs'),
 				context,
 			)
 			files.push({
@@ -74,7 +74,7 @@ export class PortGenerator extends BaseGenerator {
 		// 4. Port module (optional based on includeModule option)
 		if (context.includeModule) {
 			const moduleContent = await this.renderTemplate(
-				join(templateDir, 'module.ejs'),
+				join(templateDir, 'module.hbs'),
 				context,
 			)
 			files.push({
@@ -85,7 +85,7 @@ export class PortGenerator extends BaseGenerator {
 
 		// 5. Index file (barrel export)
 		const indexContent = await this.renderTemplate(
-			join(templateDir, 'index.ejs'),
+			join(templateDir, 'index.hbs'),
 			context,
 		)
 		files.push({
