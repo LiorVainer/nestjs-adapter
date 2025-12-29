@@ -10,9 +10,9 @@
  * - Provides compile-time type safety through static methods
  */
 
-import { Adapter, Port, defineAdapter } from '{{coreImportPath}}'
+import { Adapter, Port } from '{{coreImportPath}}'
 {{#if portTokenName}}
-import { {{portTokenName}}{{#if portInterfaceName}}, type {{portInterfaceName}}{{/if}} } from '{{portImportPath}}'
+import { {{portTokenName}} } from '{{portImportPath}}'
 {{/if}}
 import { {{namePascal}}Service } from './{{nameKebab}}.service'
 import type { {{namePascal}}Options } from './{{nameKebab}}.types'
@@ -42,7 +42,7 @@ import type { {{namePascal}}Options } from './{{nameKebab}}.types'
 	token: {{#if portTokenName}}{{portTokenName}}{{else}}{{nameScreamingSnake}}_PORT{{/if}},
 	implementation: {{namePascal}}Service,
 })
-class {{namePascal}}AdapterClass extends Adapter<{{namePascal}}Options> {
+export class {{namePascal}}Adapter extends Adapter<{{namePascal}}Options> {
 	// No additional code needed!
 	// The decorators and base class handle everything:
 	// - Token registration
@@ -68,10 +68,3 @@ class {{namePascal}}AdapterClass extends Adapter<{{namePascal}}Options> {
 	//   return [];
 	// }
 }
-
-const {{namePascal}}Adapter = defineAdapter<
-	{{#if portTokenName}}typeof {{portTokenName}}{{else}}typeof {{nameScreamingSnake}}_PORT{{/if}},
-	{{namePascal}}Options
->()({{namePascal}}AdapterClass);
-
-export default {{namePascal}}Adapter;

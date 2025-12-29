@@ -52,9 +52,7 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 	const [selectedName, setSelectedName] = useState<string | undefined>(
 		options.name,
 	)
-	const [portName, setPortName] = useState<string | undefined>(
-		options.portName,
-	)
+	const [portName, setPortName] = useState<string | undefined>(options.portName)
 	const [adapterName, setAdapterName] = useState<string | undefined>(
 		options.adapterName,
 	)
@@ -177,6 +175,7 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 					const adapterGenerator = new AdapterGenerator(config)
 					const adapterResult = await adapterGenerator.generate({
 						name: adapter,
+						portName: port,
 						outputPath: options.outputPath,
 						dryRun: options.dryRun,
 					})
@@ -184,7 +183,10 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 					// Combine results
 					genResult = {
 						success: portResult.success && adapterResult.success,
-						files: [...(portResult.files || []), ...(adapterResult.files || [])],
+						files: [
+							...(portResult.files || []),
+							...(adapterResult.files || []),
+						],
 						message:
 							portResult.success && adapterResult.success
 								? `Generated port '${port}' and adapter '${adapter}'`
@@ -195,8 +197,9 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 					const name = selectedName!
 					let generator: PortGenerator | AdapterGenerator | ServiceGenerator
 
-					const generatorOptions: GeneratorOptions = {
+					const generatorOptions = {
 						name,
+						portName: options.port,
 						outputPath: options.outputPath,
 						dryRun: options.dryRun,
 					}
@@ -375,7 +378,9 @@ export async function generateCommand(options: GenerateCommandOptions) {
 			: !options.name)
 
 	if (!isInteractive && missingArgs) {
-		console.error('Error: Interactive mode is not supported in this environment.')
+		console.error(
+			'Error: Interactive mode is not supported in this environment.',
+		)
 		console.error('')
 		console.error('Usage:')
 		console.error('  nest-hex generate <type> <name>')
@@ -385,7 +390,9 @@ export async function generateCommand(options: GenerateCommandOptions) {
 		console.error(
 			'  port     - Create domain capability (token, interface, service, module)',
 		)
-		console.error('  adapter  - Create infrastructure implementation for a port')
+		console.error(
+			'  adapter  - Create infrastructure implementation for a port',
+		)
 		console.error('  service  - Create service with @InjectPort usage')
 		console.error('  full     - Generate both port and adapter together')
 		console.error('')

@@ -4,7 +4,7 @@
  * Generates adapter files (adapter class, service implementation, types).
  */
 
-import { join } from 'node:path'
+import { basename, join, relative } from 'node:path'
 import type {
 	FileToGenerate,
 	GeneratorOptions,
@@ -49,6 +49,23 @@ export class AdapterGenerator extends BaseGenerator {
 	 * Generate all adapter files.
 	 */
 	async generate(options: AdapterGeneratorOptions): Promise<GeneratorResult> {
+		// Calculate import path from adapter to port directory
+		let portImportPath: string | undefined
+		if (options.portName && !options.portPath) {
+			const portsDir = this.config.output?.portsDir || 'ports'
+			const adaptersDir = this.config.output?.adaptersDir || 'adapters'
+
+			// Extract base directory names to calculate relative path
+			// e.g., 'src/ports' -> 'ports', 'src/adapters' -> 'adapters'
+			const portsDirName = basename(portsDir)
+			const adaptersDirName = basename(adaptersDir)
+
+			// Adapter is at: {adaptersDir}/{adapterName}/adapter.ts
+			// Port is at: {portsDir}/{portName}/index.ts
+			// From adapter directory, we need to go up 2 levels then into ports
+			portImportPath = `../../${portsDirName}/${this.getNameVariations(options.portName).kebab}`
+		}
+
 		const context = this.createTemplateContext(options, {
 			portName: options.portName,
 			portPath: options.portPath,
@@ -64,9 +81,7 @@ export class AdapterGenerator extends BaseGenerator {
 						portTokenName: `${this.getNameVariations(options.portName).screamingSnake}_${this.config.naming?.portSuffix || 'PORT'}`,
 						portInterfaceName: `${this.getNameVariations(options.portName).pascal}Port`,
 						// Import both token and interface from the port's index file
-						portImportPath:
-							options.portPath ||
-							`../../${this.config.output?.portsDir || 'ports'}/${this.getNameVariations(options.portName).kebab}`,
+						portImportPath: options.portPath || portImportPath,
 					}
 				: {}),
 		})

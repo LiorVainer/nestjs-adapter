@@ -20,7 +20,8 @@ export function TypeSelector({ onSubmit }: TypeSelectorProps) {
 
 	const options = [
 		{
-			label: 'Port - Create domain capability (token, interface, service, module)',
+			label:
+				'Port - Create domain capability (token, interface, service, module)',
 			value: 'port',
 		},
 		{
