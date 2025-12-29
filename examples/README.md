@@ -1,6 +1,6 @@
 # NestJS Adapter Examples
 
-This directory contains comprehensive, working examples demonstrating all APIs provided by the `nestjs-adapter` library.
+This directory contains comprehensive, working examples demonstrating all APIs provided by the `nest-hex` library.
 
 ## Quick Start
 

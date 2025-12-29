@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`@nestjs-adapters/core` is a tiny, class-based, NestJS-native helper library for building **pluggable adapters** using the **Ports & Adapters (Hexagonal Architecture)** pattern with exceptional developer experience and strong type safety.
+`nest-hexs/core` is a tiny, class-based, NestJS-native helper library for building **pluggable adapters** using the **Ports & Adapters (Hexagonal Architecture)** pattern with exceptional developer experience and strong type safety.
 
 **Goals:**
 - Eliminate boilerplate when creating NestJS adapter modules
@@ -137,7 +137,7 @@ export interface ObjectStoragePort {
 
 **Feature Module:** A domain service consuming the port. Example:
 ```typescript
-import { InjectPort } from '@nestjs-adapters/core';
+import { InjectPort } from 'nest-hexs/core';
 
 @Injectable()
 class ObjectStorageService {

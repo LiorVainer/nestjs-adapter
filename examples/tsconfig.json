@@ -8,7 +8,7 @@
 		"emitDecoratorMetadata": true,
 		"baseUrl": ".",
 		"paths": {
-			"@nestjs-adapter/*": ["../src/*"]
+			"nest-hex/*": ["../src/*"]
 		}
 	},
 	"include": ["**/*.ts"],

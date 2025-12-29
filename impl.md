@@ -1,4 +1,4 @@
-# Implementation Plan for @nestjs-adapters/core
+# Implementation Plan for nest-hexs/core
 
 This document outlines the step-by-step implementation plan for building the NestJS adapter library as specified in `spec/spec.md`.
 

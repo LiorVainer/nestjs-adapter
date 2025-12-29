@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "nestjs-adapter",
+      "name": "nest-hex",
       "devDependencies": {
         "@biomejs/biome": "^2.3.10",
         "@nestjs/common": "^11.0.0",

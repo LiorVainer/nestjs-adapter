@@ -50,7 +50,7 @@ import type { S3Options } from './s3.types'
 	token: OBJECT_STORAGE_PROVIDER,
 	implementation: S3ObjectStorageService,
 })
-class S3AdapterClass extends Adapter<S3Options> {
+export class S3AdapterClass extends Adapter<S3Options> {
 	// No additional code needed!
 	// The decorators and base class handle everything:
 	// - Token registration

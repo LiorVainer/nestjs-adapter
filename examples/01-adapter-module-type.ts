@@ -2,7 +2,7 @@
  * Example 01: Understanding AdapterModule<TToken>
  *
  * This example demonstrates the AdapterModule<TToken> type, which is the core
- * type-safety mechanism in nestjs-adapter. It carries compile-time proof that
+ * type-safety mechanism in nest-hex. It carries compile-time proof that
  * an adapter provides a specific token.
  *
  * Key Points:

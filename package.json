@@ -1,10 +1,10 @@
 {
-	"name": "nestjs-adapter",
+	"name": "nest-hex",
 	"version": "0.1.0",
 	"description": "A tiny NestJS-native library for building pluggable adapters (Ports & Adapters / Hexagonal) using class-based Dynamic Modules, with great DX and strong type safety.",
-	"homepage": "https://github.com/LiorVainer/nestjs-adapter#readme",
+	"homepage": "https://github.com/LiorVainer/nest-hex#readme",
 	"bugs": {
-		"url": "https://github.com/LiorVainer/nestjs-adapter/issues"
+		"url": "https://github.com/LiorVainer/nest-hex/issues"
 	},
 	"license": "MIT",
 	"files": [
@@ -12,7 +12,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/LiorVainer/nestjs-adapter.git"
+		"url": "git+https://github.com/LiorVainer/nest-hex.git"
 	},
 	"scripts": {
 		"build": "bunup",
@@ -48,19 +48,17 @@
 			"optional": true
 		}
 	},
-	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": {
-				"types": "./dist/index.d.ts",
-				"default": "./dist/index.js"
-			}
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.js"
 		},
 		"./package.json": "./package.json"
 	},
-	"module": "./dist/index.js",
 	"simple-git-hooks": {
 		"pre-commit": "bun run lint:fix && bun run type-check"
-	},
-	"types": "./dist/index.d.ts"
+	}
 }
