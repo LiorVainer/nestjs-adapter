@@ -1,31 +1,12 @@
 /**
  * Template context types
+ *
+ * This is the context object passed to EJS templates.
+ * It extends GeneratorContext with additional template-specific fields.
  */
 
-export interface TemplateContext {
-	// Name variations
-	name: string
-	nameCamel: string
-	nameKebab: string
-	namePascal: string
-	nameSnake: string
-	nameScreamingSnake: string
+import type { GeneratorContext } from './generator.types'
 
-	// Import paths (relative to output file)
-	tokenImportPath: string
-	portImportPath: string
-	serviceImportPath: string
-
-	// Style preferences
-	indent: string
-	quote: string
-	semi: string
-
-	// Metadata
-	timestamp: string
-	author?: string
-
-	// Options
-	includeModule?: boolean
-	registrationType?: 'sync' | 'async'
+export interface TemplateContext extends GeneratorContext {
+	[key: string]: unknown
 }

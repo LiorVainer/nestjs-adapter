@@ -1,0 +1,166 @@
+/**
+ * Base Generator
+ *
+ * Provides common functionality for all code generators.
+ */
+
+import * as path from 'node:path'
+import type {
+	FileToGenerate,
+	GeneratorContext,
+	GeneratorOptions,
+	GeneratorResult,
+	NestHexConfig,
+} from '../types'
+import { writeFile } from '../utils/file-writer'
+import { generateNameVariations } from '../utils/name-transformer'
+import { resolvePath } from '../utils/path-resolver'
+import { renderTemplate } from '../utils/template-renderer'
+
+/**
+ * Abstract base class for all generators.
+ *
+ * Provides common functionality like:
+ * - Template rendering
+ * - File writing
+ * - Name transformations
+ * - Path resolution
+ */
+export abstract class BaseGenerator {
+	constructor(protected readonly config: NestHexConfig) {}
+
+	/**
+	 * Generate files based on the provided options.
+	 *
+	 * This is the main entry point for all generators.
+	 */
+	abstract generate(options: GeneratorOptions): Promise<GeneratorResult>
+
+	/**
+	 * Render a template with the given context.
+	 *
+	 * @param templatePath - Path to the EJS template file
+	 * @param context - Template context
+	 * @returns Rendered template content
+	 */
+	protected async renderTemplate(
+		templatePath: string,
+		context: GeneratorContext,
+	): Promise<string> {
+		return renderTemplate(templatePath, context)
+	}
+
+	/**
+	 * Write a file to disk.
+	 *
+	 * @param filePath - Destination file path
+	 * @param content - File content
+	 * @param dryRun - If true, don't actually write the file
+	 */
+	protected async writeFile(
+		filePath: string,
+		content: string,
+		dryRun = false,
+	): Promise<void> {
+		await writeFile(filePath, content, {
+			dryRun,
+			force: false,
+		})
+	}
+
+	/**
+	 * Generate all name variations for a given name.
+	 *
+	 * @param name - Original name
+	 * @returns Object with all name case variations
+	 */
+	protected getNameVariations(
+		name: string,
+	): ReturnType<typeof generateNameVariations> {
+		return generateNameVariations(name)
+	}
+
+	/**
+	 * Resolve a path relative to the project root.
+	 *
+	 * @param relativePath - Relative path
+	 * @returns Absolute path
+	 */
+	protected resolvePath(relativePath: string): string {
+		return resolvePath(relativePath)
+	}
+
+	/**
+	 * Get the template directory for a specific generator type.
+	 *
+	 * @param type - Generator type (port, adapter, service)
+	 * @returns Absolute path to template directory
+	 */
+	protected getTemplateDir(type: 'port' | 'adapter'): string {
+		// Templates are located in src/cli/templates/
+		const templatesRoot = path.join(__dirname, '..', 'templates')
+		return path.join(templatesRoot, type)
+	}
+
+	/**
+	 * Create a template context from generator options.
+	 *
+	 * @param options - Generator options
+	 * @param additionalContext - Additional context to merge
+	 * @returns Complete template context
+	 */
+	protected createTemplateContext(
+		options: GeneratorOptions,
+		additionalContext: Record<string, unknown> = {},
+	): GeneratorContext {
+		const names = this.getNameVariations(options.name)
+
+		return {
+			...names,
+			// Add "name*" aliases for template compatibility
+			nameKebab: names.kebab,
+			nameCamel: names.camel,
+			namePascal: names.pascal,
+			nameSnake: names.snake,
+			nameScreamingSnake: names.screamingSnake,
+			// Naming configuration
+			portSuffix: this.config.naming?.portSuffix || 'PORT',
+			adapterSuffix: this.config.naming?.adapterSuffix || 'Adapter',
+			fileCase: this.config.naming?.fileCase || 'kebab',
+			// Style configuration
+			indent: this.config.style?.indent || 'tab',
+			quotes: this.config.style?.quotes || 'single',
+			semicolons: this.config.style?.semicolons ?? true,
+			// Generator options
+			includeModule: options.includeModule ?? true,
+			includeService: options.includeService ?? true,
+			registrationType: options.registrationType || 'sync',
+			generateExample: options.generateExample ?? false,
+			// Import paths
+			coreImportPath: 'nest-hex',
+			// Additional context
+			...additionalContext,
+		}
+	}
+
+	/**
+	 * Generate files from a list of file specifications.
+	 *
+	 * @param files - Array of files to generate
+	 * @param dryRun - If true, don't actually write files
+	 * @returns Array of generated file paths
+	 */
+	protected async generateFiles(
+		files: FileToGenerate[],
+		dryRun = false,
+	): Promise<string[]> {
+		const generatedFiles: string[] = []
+
+		for (const file of files) {
+			await this.writeFile(file.path, file.content, dryRun)
+			generatedFiles.push(file.path)
+		}
+
+		return generatedFiles
+	}
+}
