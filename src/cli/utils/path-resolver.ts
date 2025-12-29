@@ -2,7 +2,7 @@
  * Path resolution utilities
  */
 
-import { dirname, join, relative, resolve } from 'node:path'
+import { dirname, join, relative, resolve } from 'path'
 
 export function resolvePath(...segments: string[]): string {
 	return resolve(...segments)

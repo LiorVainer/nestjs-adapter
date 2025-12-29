@@ -4,7 +4,7 @@
  * Provides common functionality for all code generators.
  */
 
-import { join } from 'node:path'
+import { join } from 'path'
 import { defaultConfig } from '../config/defaults'
 import type {
 	FileToGenerate,

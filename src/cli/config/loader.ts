@@ -3,7 +3,7 @@
  * Uses Bun's native file checking for better performance
  */
 
-import { join } from 'node:path'
+import { join } from 'path'
 import { merge } from 'ts-deepmerge'
 import type { NestHexConfig } from '../types'
 import { defaultConfig } from './defaults'

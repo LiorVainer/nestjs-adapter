@@ -3,9 +3,6 @@
  * Uses Bun's native APIs for faster performance
  */
 
-import { existsSync, mkdirSync } from 'node:fs'
-import { dirname } from 'node:path'
-
 export interface WriteOptions {
 	force?: boolean
 	dryRun?: boolean
@@ -53,13 +50,7 @@ export async function writeFile(
 	}
 
 	try {
-		// Ensure directory exists
-		const dir = dirname(filePath)
-		if (!existsSync(dir)) {
-			mkdirSync(dir, { recursive: true })
-		}
-
-		// Write file using Bun's fast file I/O
+		// Bun.write automatically creates parent directories
 		await Bun.write(filePath, content)
 
 		return {
@@ -80,8 +71,3 @@ export async function writeFile(
 	}
 }
 
-export function ensureDirectory(dirPath: string): void {
-	if (!existsSync(dirPath)) {
-		mkdirSync(dirPath, { recursive: true })
-	}
-}

@@ -4,7 +4,7 @@
  * Generates adapter files (adapter class, service implementation, types).
  */
 
-import { join } from 'node:path'
+import { join } from 'path'
 import type {
 	FileToGenerate,
 	GeneratorOptions,
