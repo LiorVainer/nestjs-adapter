@@ -1,4 +1,4 @@
-# nest-hexs/core
+# nest-hex
 
 > A tiny, **class-based**, **NestJS-native** helper library for building **pluggable adapters** following the Ports & Adapters (Hexagonal Architecture) pattern with minimal boilerplate and great developer experience.
 
@@ -28,13 +28,13 @@ This library provides base classes and decorators to eliminate this boilerplate 
 ## Installation
 
 ```bash
-npm install nest-hexs/core
+npm install nest-hex
 # or
-yarn add nest-hexs/core
+yarn add nest-hex
 # or
-pnpm add nest-hexs/core
+pnpm add nest-hex
 # or
-bun add nest-hexs/core
+bun add nest-hex
 ```
 
 ### Peer Dependencies
@@ -62,7 +62,7 @@ export interface StoragePort {
 ```typescript
 // s3.adapter.ts
 import { Injectable } from '@nestjs/common';
-import { Adapter, Port } from 'nest-hexs/core';
+import { Adapter, Port } from 'nest-hex';
 import { STORAGE_PORT, type StoragePort } from './storage.port';
 
 // Implementation service
@@ -100,7 +100,7 @@ export class S3Adapter extends Adapter<S3Options> {}
 ```typescript
 // storage.module.ts
 import { Injectable, Module } from '@nestjs/common';
-import { InjectPort, PortModule } from 'nest-hexs/core';
+import { InjectPort, PortModule } from 'nest-hex';
 import { STORAGE_PORT, type StoragePort } from './storage.port';
 
 // Domain service that uses the port
@@ -174,7 +174,7 @@ export class S3StorageModule {
 }
 ```
 
-### After (With nest-hexs/core)
+### After (With nest-hex)
 
 ```typescript
 // Clean and declarative!
@@ -265,7 +265,7 @@ export class AppModule {}
 ### Testing with Mock Adapters
 
 ```typescript
-import { Adapter, Port } from 'nest-hexs/core';
+import { Adapter, Port } from 'nest-hex';
 
 class MockStorageService {
   async upload(file: Buffer, key: string) {

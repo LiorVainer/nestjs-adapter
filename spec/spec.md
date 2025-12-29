@@ -1,4 +1,4 @@
-# nest-hexs/core — Spec, Implementation, and Examples (AWS + HTTP)
+# nest-hex — Spec, Implementation, and Examples (AWS + HTTP)
 
 A tiny, **class-based**, **NestJS-native** helper library for building **pluggable adapters** (Ports & Adapters / Hexagonal) with great DX.
 
@@ -442,7 +442,7 @@ export interface ObjectStoragePort {
 ```ts
 // libs/storage/src/object-storage.service.ts
 import { Injectable } from '@nestjs/common';
-import { InjectPort } from 'nest-hexs/core';
+import { InjectPort } from 'nest-hex';
 import { OBJECT_STORAGE_PROVIDER } from './object-storage.token';
 import type { ObjectStoragePort } from './object-storage.port';
 
@@ -480,7 +480,7 @@ export class ObjectStorageService {
 ```ts
 // libs/storage/src/object-storage.module.ts
 import { Module } from '@nestjs/common';
-import { PortModule } from 'nest-hexs/core';
+import { PortModule } from 'nest-hex';
 import { ObjectStorageService } from './object-storage.service';
 
 @Module({})
@@ -573,7 +573,7 @@ export class S3ObjectStorageService {
 
 ```ts
 // libs/storage/src/adapters/s3/s3.adapter.ts
-import { Adapter, Port, defineAdapter } from 'nest-hexs/core';
+import { Adapter, Port, defineAdapter } from 'nest-hex';
 import { OBJECT_STORAGE_PROVIDER } from '../../object-storage.token';
 import type { S3AdapterOptions } from './s3.types';
 import { S3ObjectStorageService } from './s3.service';
@@ -637,7 +637,7 @@ export interface CurrencyRatesPort {
 ```ts
 // libs/rates/src/currency-rates.service.ts
 import { Injectable } from '@nestjs/common';
-import { InjectPort } from 'nest-hexs/core';
+import { InjectPort } from 'nest-hex';
 import { CURRENCY_RATES_PROVIDER } from './currency-rates.token';
 import type { CurrencyRatesPort } from './currency-rates.port';
 
@@ -660,7 +660,7 @@ export class CurrencyRatesService {
 ```ts
 // libs/rates/src/currency-rates.module.ts
 import { Module } from '@nestjs/common';
-import { PortModule } from 'nest-hexs/core';
+import { PortModule } from 'nest-hex';
 import { CurrencyRatesService } from './currency-rates.service';
 
 @Module({})
@@ -709,7 +709,7 @@ export class HttpCurrencyRatesService {
 ```ts
 // libs/rates/src/adapters/http/http-rates.adapter.ts
 import { HttpModule } from '@nestjs/axios';
-import { Adapter, Port, defineAdapter } from 'nest-hexs/core';
+import { Adapter, Port, defineAdapter } from 'nest-hex';
 import { CURRENCY_RATES_PROVIDER } from '../../currency-rates.token';
 import type { HttpRatesOptions } from './http-rates.types';
 import { HttpCurrencyRatesService } from './http-rates.service';
@@ -784,7 +784,7 @@ export class AppModule {}
 Mock adapter:
 
 ```ts
-import { Adapter, Port, defineAdapter } from 'nest-hexs/core';
+import { Adapter, Port, defineAdapter } from 'nest-hex';
 import { CURRENCY_RATES_PROVIDER } from './currency-rates.token';
 
 class MockRatesPort {

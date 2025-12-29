@@ -2,7 +2,7 @@
 
 ## Context
 
-This is the core foundation of the `nest-hexs/core` library. The Adapter base class must provide a reusable pattern for creating NestJS dynamic modules that implement the Ports & Adapters (Hexagonal Architecture) pattern.
+This is the core foundation of the `nest-hex` library. The Adapter base class must provide a reusable pattern for creating NestJS dynamic modules that implement the Ports & Adapters (Hexagonal Architecture) pattern.
 
 **Key stakeholders:**
 - Library consumers who will extend this class to create adapters

@@ -1,6 +1,6 @@
 # Decorator‑Driven Adapter API (vNext)
 
-This document summarizes the **new public API** for `nest-hexs/core`, introducing:
+This document summarizes the **new public API** for `nest-hex`, introducing:
 
 - Declarative **decorators** for adapter metadata
 - A compile‑time‑only **defineAdapter** helper for strong type safety

@@ -1,6 +1,6 @@
 ## Context
 
-The `nest-hexs/core` library provides base classes and decorators for building pluggable adapters in NestJS using the Ports & Adapters pattern. Testing this library requires a comprehensive strategy that covers:
+The `nest-hex` library provides base classes and decorators for building pluggable adapters in NestJS using the Ports & Adapters pattern. Testing this library requires a comprehensive strategy that covers:
 
 1. **Unit Testing**: Core classes, decorators, and helpers in isolation
 2. **Integration Testing**: Full NestJS DI container setup with adapters and port modules
@@ -71,7 +71,7 @@ describe('Adapter.register()', () => {
 **Implementation:**
 ```typescript
 import 'reflect-metadata';
-import { Port } from 'nest-hexs/core';
+import { Port } from 'nest-hex';
 import { PORT_TOKEN_METADATA, PORT_IMPLEMENTATION_METADATA } from '../constants';
 
 describe('@Port decorator', () => {

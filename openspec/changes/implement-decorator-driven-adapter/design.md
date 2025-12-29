@@ -2,7 +2,7 @@
 
 ## Context
 
-This is the core foundation of the `nest-hexs/core` library. The decorator-driven adapter API provides a clean, declarative way to build NestJS dynamic modules that implement the Ports & Adapters (Hexagonal Architecture) pattern.
+This is the core foundation of the `nest-hex` library. The decorator-driven adapter API provides a clean, declarative way to build NestJS dynamic modules that implement the Ports & Adapters (Hexagonal Architecture) pattern.
 
 **Key stakeholders:**
 - Library consumers who will use decorators to create adapters
