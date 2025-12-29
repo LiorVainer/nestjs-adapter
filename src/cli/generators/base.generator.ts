@@ -5,6 +5,7 @@
  */
 
 import { join } from 'node:path'
+import { defaultConfig } from '../config/defaults'
 import type {
 	FileToGenerate,
 	GeneratorContext,
@@ -12,7 +13,6 @@ import type {
 	GeneratorResult,
 	NestHexConfig,
 } from '../types'
-import { defaultConfig } from '../config/defaults'
 import { writeFile } from '../utils/file-writer'
 import { generateNameVariations } from '../utils/name-transformer'
 import { resolvePath } from '../utils/path-resolver'
@@ -132,10 +132,13 @@ export abstract class BaseGenerator {
 			fileCase: (this.config.naming?.fileCase ??
 				defaultConfig.naming.fileCase) as 'kebab' | 'camel' | 'pascal',
 			// Style configuration - use defaults as fallback
-			indent: (this.config.style?.indent ??
-				defaultConfig.style.indent) as 'tab' | 2 | 4,
-			quotes: (this.config.style?.quotes ??
-				defaultConfig.style.quotes) as 'single' | 'double',
+			indent: (this.config.style?.indent ?? defaultConfig.style.indent) as
+				| 'tab'
+				| 2
+				| 4,
+			quotes: (this.config.style?.quotes ?? defaultConfig.style.quotes) as
+				| 'single'
+				| 'double',
 			semicolons: (this.config.style?.semicolons ??
 				defaultConfig.style.semicolons) as boolean,
 			// Generator options
