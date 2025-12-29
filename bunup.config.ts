@@ -1,7 +1,6 @@
 import { defineConfig } from 'bunup'
-import type { BunupConfig } from 'bunup'
 
-const config: BunupConfig = defineConfig({
+const config: ReturnType<typeof defineConfig> = defineConfig({
 	entry: 'src/index.ts',
 	outDir: 'dist',
 	format: 'cjs', // Output CommonJS format
