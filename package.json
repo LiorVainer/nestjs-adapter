@@ -68,5 +68,8 @@
 	},
 	"simple-git-hooks": {
 		"pre-commit": "bun run lint:fix && bun run type-check"
+	},
+	"dependencies": {
+		"ts-deepmerge": "^7.0.3"
 	}
 }

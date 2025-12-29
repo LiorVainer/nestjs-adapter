@@ -4,8 +4,8 @@
  */
 
 import { join } from 'node:path'
+import { merge } from 'ts-deepmerge'
 import type { NestHexConfig } from '../types'
-import { deepMerge } from '../utils/deep-merge'
 import { defaultConfig } from './defaults'
 
 export async function loadConfig(
@@ -23,7 +23,7 @@ export async function loadConfig(
 		// Dynamic import works natively in Bun with TypeScript
 		const config = await import(configPath)
 		// Use deep merge to properly merge nested config objects
-		return deepMerge(defaultConfig, config.default ?? {})
+		return merge(defaultConfig, config.default ?? {}) as NestHexConfig
 	} catch (error) {
 		console.warn('Failed to load config, using defaults:', error)
 		return defaultConfig
