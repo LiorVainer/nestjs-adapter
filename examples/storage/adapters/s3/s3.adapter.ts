@@ -7,10 +7,10 @@
  * Key Points:
  * - Extends Adapter<S3Options>
  * - Uses @Port to declare the token and implementation
- * - Wrapped with defineAdapter for compile-time type safety
+ * - Provides compile-time type safety through static methods
  */
 
-import { Adapter, defineAdapter, Port } from '../../../../src'
+import { Adapter, Port } from '../../../../src'
 import { OBJECT_STORAGE_PROVIDER } from '../../object-storage.token'
 import { S3ObjectStorageService } from './s3.service'
 import type { S3Options } from './s3.types'
@@ -50,7 +50,7 @@ import type { S3Options } from './s3.types'
 	token: OBJECT_STORAGE_PROVIDER,
 	implementation: S3ObjectStorageService,
 })
-export class S3AdapterClass extends Adapter<S3Options> {
+export class S3Adapter extends Adapter<S3Options> {
 	// No additional code needed!
 	// The decorators and base class handle everything:
 	// - Token registration
@@ -79,10 +79,6 @@ export class S3AdapterClass extends Adapter<S3Options> {
 	//   ];
 	// }
 }
-
-const S3Adapter = defineAdapter<typeof OBJECT_STORAGE_PROVIDER, S3Options>()(
-	S3AdapterClass,
-)
 
 export default S3Adapter
 

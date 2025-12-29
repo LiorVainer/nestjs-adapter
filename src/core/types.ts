@@ -23,21 +23,3 @@ export type PortConfig<Token, Port> = {
 	token: Token
 	port: Port
 }
-
-/**
- * Type for an Adapter class returned by `defineAdapter()`.
- * Represents a class constructor with static `register` and `registerAsync` methods.
- *
- * @template TToken - The port token type this adapter provides
- * @template TOptions - The options type for configuring this adapter
- */
-export type TypedAdapter<TToken, TOptions> = (new () => {
-	imports(_options?: TOptions): unknown[]
-}) & {
-	register(options: TOptions): AdapterModule<TToken>
-	registerAsync(asyncOptions: {
-		imports?: unknown[]
-		inject?: unknown[]
-		useFactory: (...args: unknown[]) => TOptions | Promise<TOptions>
-	}): AdapterModule<TToken>
-}

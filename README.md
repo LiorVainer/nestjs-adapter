@@ -62,7 +62,7 @@ export interface StoragePort {
 ```typescript
 // s3.adapter.ts
 import { Injectable } from '@nestjs/common';
-import { Adapter, Port, defineAdapter } from 'nest-hexs/core';
+import { Adapter, Port } from 'nest-hexs/core';
 import { STORAGE_PORT, type StoragePort } from './storage.port';
 
 // Implementation service
@@ -92,14 +92,7 @@ interface S3Options {
   token: STORAGE_PORT,
   implementation: S3StorageService,
 })
-class S3AdapterClass extends Adapter<S3Options> {}
-
-// Export with type safety
-const S3Adapter = defineAdapter<typeof STORAGE_PORT, S3Options>()(
-  S3AdapterClass,
-);
-
-export default S3Adapter;
+export class S3Adapter extends Adapter<S3Options> {}
 ```
 
 ### 3. Create a Port Module (Domain Service)
@@ -189,11 +182,7 @@ export class S3StorageModule {
   token: STORAGE_PORT,
   implementation: S3StorageService,
 })
-class S3AdapterClass extends Adapter<S3Options> {}
-
-const S3Adapter = defineAdapter<typeof STORAGE_PORT, S3Options>()(
-  S3AdapterClass,
-);
+export class S3Adapter extends Adapter<S3Options> {}
 ```
 
 ## Advanced Usage
@@ -276,7 +265,7 @@ export class AppModule {}
 ### Testing with Mock Adapters
 
 ```typescript
-import { Adapter, Port, defineAdapter } from 'nest-hexs/core';
+import { Adapter, Port } from 'nest-hexs/core';
 
 class MockStorageService {
   async upload(file: Buffer, key: string) {
@@ -292,11 +281,7 @@ class MockStorageService {
   token: STORAGE_PORT,
   implementation: MockStorageService,
 })
-class MockStorageAdapterClass extends Adapter<void> {}
-
-const MockStorageAdapter = defineAdapter<typeof STORAGE_PORT, void>()(
-  MockStorageAdapterClass,
-);
+export class MockStorageAdapter extends Adapter<void> {}
 
 // Use in tests
 const module = await Test.createTestingModule({
@@ -374,21 +359,6 @@ type AdapterModule<TToken> = DynamicModule & {
 };
 ```
 
-### Helpers
-
-#### `defineAdapter<TToken, TOptions>()`
-
-Compile-time helper that verifies adapter contract and enforces type safety.
-
-**Returns:** Identity function (zero runtime cost)
-
-**Example:**
-```typescript
-const S3Adapter = defineAdapter<typeof STORAGE_PORT, S3Options>()(
-  S3AdapterClass,
-);
-```
-
 ## Best Practices
 
 ### ✅ Do's
@@ -440,7 +410,6 @@ See the [`examples/`](./examples) directory for complete working examples:
 - **Object Storage** - S3 adapter with file upload/download
 - **Currency Rates** - HTTP API adapter with rate conversion
 - **Basic Examples** - Decorator usage patterns
-- **defineAdapter Helper** - Type-safe adapter creation
 
 ## Documentation
 

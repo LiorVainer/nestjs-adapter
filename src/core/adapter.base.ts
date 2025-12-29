@@ -14,21 +14,19 @@ import type { AdapterModule } from './types'
  *
  * @example
  * ```typescript
- * export default defineAdapter<typeof STORAGE_PORT, S3Options>()(
- *   @Port({
- *     token: STORAGE_PORT,
- *     implementation: S3Service
- *   })
- *   class S3Adapter extends Adapter<S3Options> {
- *     protected imports(options: S3Options) {
- *       return []; // Optional: import other modules
- *     }
- *
- *     protected extraPoviders(options: S3Options) {
- *       return []; // Optional: additional providers
- *     }
+ * @Port({
+ *   token: STORAGE_PORT,
+ *   implementation: S3Service
+ * })
+ * export class S3Adapter extends Adapter<S3Options> {
+ *   protected override imports(options: S3Options) {
+ *     return []; // Optional: import other modules
  *   }
- * );
+ *
+ *   protected override extraPoviders(options: S3Options) {
+ *     return []; // Optional: additional providers
+ *   }
+ * }
  * ```
  */
 export class Adapter<TOptions> {

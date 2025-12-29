@@ -6,7 +6,7 @@
  */
 
 import type { Provider } from '@nestjs/common'
-import { Adapter, defineAdapter, Port } from '../../../../src'
+import { Adapter, Port } from '../../../../src'
 import { CURRENCY_RATES_PROVIDER } from '../../currency-rates.token'
 import { HttpRatesService } from './http-rates.service'
 import type { HttpRatesOptions } from './http-rates.types'
@@ -43,7 +43,7 @@ import type { HttpRatesOptions } from './http-rates.types'
 	token: CURRENCY_RATES_PROVIDER,
 	implementation: HttpRatesService,
 })
-class HttpRatesAdapterClass extends Adapter<HttpRatesOptions> {
+class HttpRatesAdapter extends Adapter<HttpRatesOptions> {
 	/**
 	 * Optional: Override imports() to add HttpModule dependency.
 	 *
@@ -74,11 +74,6 @@ class HttpRatesAdapterClass extends Adapter<HttpRatesOptions> {
 		return []
 	}
 }
-
-const HttpRatesAdapter = defineAdapter<
-	typeof CURRENCY_RATES_PROVIDER,
-	HttpRatesOptions
->()(HttpRatesAdapterClass)
 
 export default HttpRatesAdapter
 
