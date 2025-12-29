@@ -38,13 +38,30 @@ export async function runLinter(
 		const command = `${linterConfig.command} ${args.join(' ')} ${files.join(' ')}`
 
 		exec(command, { cwd }, (error, stdout, stderr) => {
+			// Check if error is "No files were processed" from Biome
+			// This happens when files are in .gitignore and Biome uses useIgnoreFile
+			const noFilesProcessed =
+				stderr.includes('No files were processed') ||
+				stdout.includes('No files were processed') ||
+				stdout.includes('Checked 0 files')
+
 			if (error) {
-				resolve({
-					success: false,
-					stdout,
-					stderr,
-					code: error.code ?? null,
-				})
+				// If the only issue is no files processed, treat as success
+				if (noFilesProcessed) {
+					resolve({
+						success: true,
+						stdout,
+						stderr,
+						code: 0,
+					})
+				} else {
+					resolve({
+						success: false,
+						stdout,
+						stderr,
+						code: error.code ?? null,
+					})
+				}
 			} else {
 				resolve({
 					success: true,

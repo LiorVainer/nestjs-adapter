@@ -229,8 +229,8 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 					),
 				)
 
-				// Step 3: Lint files (if not disabled)
-				if (!options.noLint && genResult.success) {
+				// Step 3: Lint files (if not disabled and not in dry-run mode)
+				if (!options.noLint && !options.dryRun && genResult.success) {
 					setSteps((prev: ProgressStep[]) => [
 						...prev,
 						{
@@ -347,6 +347,7 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 					filesGenerated={result.files?.length || 0}
 					totalFiles={result.files?.length || 0}
 					outputPath={options.outputPath}
+					files={result.files}
 					tips={[
 						'Import generated files in your modules',
 						selectedType === 'port' && selectedName
