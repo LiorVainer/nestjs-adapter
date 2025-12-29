@@ -13,7 +13,8 @@
 		"rules": {
 			"recommended": true,
 			"complexity": {
-				"noStaticOnlyClass": "off"
+				"noStaticOnlyClass": "off",
+				"noThisInStatic": "off"
 			},
 			"suspicious": {
 				"noExplicitAny": "off"

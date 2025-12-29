@@ -6,4 +6,4 @@ export { InjectPort, Port } from './core/decorators'
 export { defineAdapter } from './core/define-adapter'
 export { PortModule } from './core/port-module.base'
 // Type definitions
-export type { AdapterModule, PortConfig } from './core/types'
+export type { AdapterModule, PortConfig, TypedAdapter } from './core/types'

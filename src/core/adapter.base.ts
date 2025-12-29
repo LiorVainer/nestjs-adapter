@@ -66,28 +66,28 @@ export class Adapter<TOptions> {
 		this: new () => Adapter<TOptions>,
 		options: TOptions,
 	): AdapterModule<TToken> {
-		const instance = new Adapter()
+		const instance = new this()
 
 		// Read metadata from @Port decorator
-		const token = Reflect.getMetadata(PORT_TOKEN_METADATA, Adapter) as TToken
+		const token = Reflect.getMetadata(PORT_TOKEN_METADATA, this) as TToken
 		const implementation = Reflect.getMetadata(
 			PORT_IMPLEMENTATION_METADATA,
-			Adapter,
+			this,
 		) as Type<unknown>
 
 		if (!token) {
 			throw new Error(
-				`${Adapter.name} must be decorated with @Port() and specify 'token'`,
+				`${this.name} must be decorated with @Port() and specify 'token'`,
 			)
 		}
 		if (!implementation) {
 			throw new Error(
-				`${Adapter.name} must be decorated with @Port() and specify 'implementation'`,
+				`${this.name} must be decorated with @Port() and specify 'implementation'`,
 			)
 		}
 
 		return {
-			module: Adapter,
+			module: this,
 			imports: instance.imports(options) as never[],
 			providers: [
 				implementation,
@@ -124,28 +124,28 @@ export class Adapter<TOptions> {
 			useFactory: (...args: unknown[]) => TOptions | Promise<TOptions>
 		},
 	): AdapterModule<TToken> {
-		const instance = new Adapter()
+		const instance = new this()
 
 		// Read metadata from @Port decorator
-		const token = Reflect.getMetadata(PORT_TOKEN_METADATA, Adapter) as TToken
+		const token = Reflect.getMetadata(PORT_TOKEN_METADATA, this) as TToken
 		const implementation = Reflect.getMetadata(
 			PORT_IMPLEMENTATION_METADATA,
-			Adapter,
+			this,
 		) as Type<unknown>
 
 		if (!token) {
 			throw new Error(
-				`${Adapter.name} must be decorated with @Port() and specify 'token'`,
+				`${this.name} must be decorated with @Port() and specify 'token'`,
 			)
 		}
 		if (!implementation) {
 			throw new Error(
-				`${Adapter.name} must be decorated with @Port() and specify 'implementation'`,
+				`${this.name} must be decorated with @Port() and specify 'implementation'`,
 			)
 		}
 
 		return {
-			module: Adapter,
+			module: this,
 			imports: [...(options.imports ?? []), ...instance.imports()] as never[],
 			providers: [
 				implementation,

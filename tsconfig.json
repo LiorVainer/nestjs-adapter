@@ -15,6 +15,9 @@
 		"noUncheckedIndexedAccess": true,
 		"noImplicitOverride": true,
 
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+
 		"declaration": true,
 		"isolatedDeclarations": true,
 
@@ -23,6 +26,6 @@
 		"noPropertyAccessFromIndexSignature": false
 	},
 
-	"include": ["src/**/*"],
+	"include": ["src/**/*", "tests/**/*"],
 	"exclude": ["node_modules", "dist", "bunup.config.ts"]
 }

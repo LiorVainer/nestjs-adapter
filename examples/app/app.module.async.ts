@@ -88,8 +88,8 @@ const configFactory = (): AppConfig => ({
 	rates: {
 		apiUrl: process.env.RATES_API_URL ?? 'https://api.exchangerate.host',
 		apiKey: process.env.RATES_API_KEY,
-		timeoutMs: Number.parseInt(process.env.RATES_TIMEOUT_MS ?? '5000'),
-		maxRetries: Number.parseInt(process.env.RATES_MAX_RETRIES ?? '3'),
+		timeoutMs: Number.parseInt(process.env.RATES_TIMEOUT_MS ?? '5000', 10),
+		maxRetries: Number.parseInt(process.env.RATES_MAX_RETRIES ?? '3', 10),
 	},
 })
 
