@@ -52,15 +52,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Authenticate to npm (bun respects .npmrc)
-      - name: Authenticate npm
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # Publish to npm
+      # Publish to npm using trusted publishing (OIDC)
+      # No authentication step needed - uses id-token permission
       - name: Publish to npm
-        run: bunx npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: bunx npm publish --access public --provenance
