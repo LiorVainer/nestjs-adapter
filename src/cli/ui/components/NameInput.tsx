@@ -16,7 +16,11 @@ export interface NameInputProps {
 /**
  * Name input for component generation.
  */
-export function NameInput({ type, step, onSubmit }: NameInputProps): JSX.Element {
+export function NameInput({
+	type,
+	step,
+	onSubmit,
+}: NameInputProps): JSX.Element {
 	// For 'full' type, show different prompts based on the step
 	if (type === 'full') {
 		const currentStep = step || 'port'

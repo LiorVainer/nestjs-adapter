@@ -22,7 +22,10 @@ export interface ProgressIndicatorProps {
 /**
  * Progress indicator that shows current step with spinner.
  */
-export function ProgressIndicator({ steps, title }: ProgressIndicatorProps): JSX.Element {
+export function ProgressIndicator({
+	steps,
+	title,
+}: ProgressIndicatorProps): JSX.Element {
 	return (
 		<Box flexDirection="column" paddingY={1}>
 			{title && (

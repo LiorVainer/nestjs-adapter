@@ -18,7 +18,10 @@ export interface PortSelectorProps {
 /**
  * Displays a list of available ports and allows the user to select one
  */
-export function PortSelector({ ports, onSubmit }: PortSelectorProps): JSX.Element {
+export function PortSelector({
+	ports,
+	onSubmit,
+}: PortSelectorProps): JSX.Element {
 	if (ports.length === 0) {
 		return (
 			<Box flexDirection="column" padding={1}>

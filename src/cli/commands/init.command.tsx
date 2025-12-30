@@ -54,7 +54,9 @@ function isInternalDevelopment(): boolean {
 /**
  * Initialize nest-hex configuration file.
  */
-export async function initCommand(options: InitCommandOptions = {}): Promise<void> {
+export async function initCommand(
+	options: InitCommandOptions = {},
+): Promise<void> {
 	const configPath = join(process.cwd(), 'nest-hex.config.ts')
 	const configExists = existsSync(configPath)
 
