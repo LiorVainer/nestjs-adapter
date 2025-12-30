@@ -162,19 +162,35 @@ export abstract class BaseGenerator {
 	 * @param files - Array of files to generate
 	 * @param dryRun - If true, don't actually write files
 	 * @returns Array of successfully generated file paths
+	 * @throws Error if any files fail to write
 	 */
 	protected async generateFiles(
 		files: FileToGenerate[],
 		dryRun = false,
 	): Promise<string[]> {
 		const generatedFiles: string[] = []
+		const failures: Array<{ path: string; error: string }> = []
 
 		for (const file of files) {
 			const result = await this.writeFile(file.path, file.content, dryRun)
-			// Only add to list if write was successful
+
 			if (result.success) {
 				generatedFiles.push(file.path)
+			} else {
+				failures.push({
+					path: file.path,
+					error: result.message || 'Unknown error',
+				})
+				console.error(`Failed to write ${file.path}: ${result.message}`)
 			}
+		}
+
+		// If any files failed, report them
+		if (failures.length > 0) {
+			const errorMsg =
+				`Failed to generate ${failures.length} file(s):\n` +
+				failures.map((f) => `  - ${f.path}: ${f.error}`).join('\n')
+			throw new Error(errorMsg)
 		}
 
 		return generatedFiles

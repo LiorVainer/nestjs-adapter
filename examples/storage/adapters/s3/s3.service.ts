@@ -43,7 +43,7 @@ export class S3ObjectStorageService implements ObjectStoragePort {
 	async upload(
 		key: string,
 		data: Buffer,
-		contentType?: string,
+		_contentType?: string,
 	): Promise<UploadResult> {
 		console.log(`S3: Uploading object: ${key}`)
 
@@ -167,7 +167,7 @@ export class S3ObjectStorageService implements ObjectStoragePort {
 	/**
 	 * List objects in S3 with a given prefix.
 	 */
-	async list(prefix = '', maxResults = 1000): Promise<ObjectMetadata[]> {
+	async list(prefix = '', _maxResults = 1000): Promise<ObjectMetadata[]> {
 		console.log(`S3: Listing objects with prefix: ${prefix}`)
 
 		// In a real implementation:

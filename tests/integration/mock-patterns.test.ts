@@ -1,5 +1,5 @@
 import { describe, expect, it, mock } from 'bun:test'
-import { Test, TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
 import 'reflect-metadata'
 import { Injectable } from '@nestjs/common'
 import { Adapter, InjectPort, Port } from '../../src'

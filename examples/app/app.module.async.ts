@@ -43,7 +43,7 @@ class ConfigService<T = unknown, K extends boolean = false> {
 
 	get<P extends keyof T>(
 		path: P,
-		options?: { infer: K },
+		_options?: { infer: K },
 	): K extends true ? T[P] : T[P] | undefined {
 		// Simplified mock implementation
 		return (this.options as Record<string, unknown>)[

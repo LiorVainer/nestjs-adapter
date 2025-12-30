@@ -16,7 +16,7 @@ export interface TypeSelectorProps {
  * Component type selector (port, adapter, service, full).
  */
 export function TypeSelector({ onSubmit }: TypeSelectorProps) {
-	const [selectedType, setSelectedType] = useState<string | undefined>()
+	const [_selectedType, setSelectedType] = useState<string | undefined>()
 
 	const options = [
 		{

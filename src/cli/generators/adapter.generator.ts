@@ -4,7 +4,7 @@
  * Generates adapter files (adapter class, service implementation, types).
  */
 
-import { basename, join, relative } from 'node:path'
+import { basename, join } from 'node:path'
 import type {
 	FileToGenerate,
 	GeneratorOptions,
@@ -63,7 +63,7 @@ export class AdapterGenerator extends BaseGenerator {
 			// Extract base directory names to calculate relative path
 			// e.g., 'src/ports' -> 'ports', 'src/adapters' -> 'adapters'
 			const portsDirName = basename(portsDir)
-			const adaptersDirName = basename(adaptersDir)
+			const _adaptersDirName = basename(adaptersDir)
 
 			// Adapter is at: {adaptersDir}/{adapterName}/adapter.ts
 			// Port is at: {portsDir}/{portName}/index.ts

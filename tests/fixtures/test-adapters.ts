@@ -1,4 +1,4 @@
-import { Adapter, type AdapterModule, Port } from '../../src'
+import { Adapter, Port } from '../../src'
 import {
 	MockApiService,
 	MockCacheService,

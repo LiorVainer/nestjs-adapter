@@ -12,9 +12,8 @@ import {
 	PortGenerator,
 	ServiceGenerator,
 } from '../generators'
-import type { GeneratorOptions, GeneratorResult } from '../types'
+import type { GeneratorResult } from '../types'
 import {
-	FileProgress,
 	NameInput,
 	ProgressIndicator,
 	type ProgressStep,
@@ -73,7 +72,7 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 		return 'port'
 	})
 	const [steps, setSteps] = useState<ProgressStep[]>([])
-	const [files, setFiles] = useState<FileProgresState[]>([])
+	const [_files, _setFiles] = useState<FileProgresState[]>([])
 	const [result, setResult] = useState<GeneratorResult | null>(null)
 	const [error, setError] = useState<Error | null>(null)
 
@@ -159,9 +158,10 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 				let genResult: GeneratorResult
 
 				// Handle 'full' type - generate both port and adapter
-				if (type === 'full') {
-					const port = portName!
-					const adapter = adapterName!
+				if (type === 'full' && portName && adapterName) {
+					// TypeScript now knows these are defined
+					const port = portName
+					const adapter = adapterName
 
 					// Generate port first
 					const portGenerator = new PortGenerator(config)
@@ -192,9 +192,10 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 								? `Generated port '${port}' and adapter '${adapter}'`
 								: 'Some files failed to generate',
 					}
-				} else {
+				} else if (selectedName) {
 					// Handle single generator types
-					const name = selectedName!
+					// TypeScript now knows selectedName is defined
+					const name = selectedName
 					let generator: PortGenerator | AdapterGenerator | ServiceGenerator
 
 					const generatorOptions = {
@@ -219,6 +220,10 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 					}
 
 					genResult = await generator.generate(generatorOptions)
+				} else {
+					throw new Error(
+						'Invalid state: selectedName is required for non-full generator types',
+					)
 				}
 
 				setResult(genResult)

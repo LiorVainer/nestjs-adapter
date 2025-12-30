@@ -31,8 +31,18 @@ export async function detectLinter(projectRoot: string): Promise<LinterConfig> {
 	if (existsSync(packageJsonPath)) {
 		try {
 			packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
-		} catch {
-			// Invalid package.json, continue with empty object
+		} catch (error) {
+			console.warn(
+				`Warning: Failed to parse package.json at ${packageJsonPath}`,
+			)
+			console.warn(
+				`Error: ${error instanceof Error ? error.message : String(error)}`,
+			)
+			console.warn(
+				'Continuing with linter detection using config files only...\n',
+			)
+			// Continue with empty packageJson - this is acceptable as a fallback
+			// but we've informed the user why
 		}
 	}
 

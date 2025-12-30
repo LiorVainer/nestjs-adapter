@@ -4,7 +4,7 @@ import 'reflect-metadata'
 import { Injectable } from '@nestjs/common'
 import { InjectPort } from '../../src'
 import { TestApiAdapter, TestStorageAdapter } from '../fixtures/test-adapters'
-import type { TestApiPort, TestStoragePort } from '../fixtures/test-ports'
+import type { TestStoragePort } from '../fixtures/test-ports'
 import { TEST_API_TOKEN, TEST_STORAGE_TOKEN } from '../fixtures/test-tokens'
 
 describe('Adapter Registration (Integration)', () => {

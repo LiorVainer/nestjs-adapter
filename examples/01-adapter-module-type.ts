@@ -48,7 +48,7 @@ acceptsStorageAdapter(s3AdapterModule)
 // Example: Different token for a different port
 const CURRENCY_RATES_PROVIDER = Symbol('CURRENCY_RATES_PROVIDER')
 
-const httpRatesModule: AdapterModule<typeof CURRENCY_RATES_PROVIDER> = {
+const _httpRatesModule: AdapterModule<typeof CURRENCY_RATES_PROVIDER> = {
 	module: class HttpRatesAdapter {},
 	imports: [],
 	providers: [

@@ -95,7 +95,7 @@ interface SmtpOptions {
 class SmtpService implements EmailPort {
 	constructor(private readonly options: SmtpOptions) {}
 
-	async sendEmail(to: string, subject: string, body: string): Promise<void> {
+	async sendEmail(to: string, subject: string, _body: string): Promise<void> {
 		console.log('SMTP: Sending email via SMTP server')
 		console.log(`  Host: ${this.options.host}:${this.options.port}`)
 		console.log(`  User: ${this.options.username}`)
