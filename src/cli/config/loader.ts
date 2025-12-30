@@ -25,7 +25,12 @@ export async function loadConfig(
 		// Use deep merge to properly merge nested config objects
 		return merge(defaultConfig, config.default ?? {}) as NestHexConfig
 	} catch (error) {
-		console.warn('Failed to load config, using defaults:', error)
+		// Log error but continue with defaults - this allows CLI to work even with invalid config
+		console.error(`\nWarning: Failed to load configuration from ${configPath}`)
+		console.error('Using default configuration instead.\n')
+		if (error instanceof Error) {
+			console.error(`Error: ${error.message}\n`)
+		}
 		return defaultConfig
 	}
 }

@@ -40,7 +40,7 @@ export abstract class BaseGenerator {
 	/**
 	 * Render a template with the given context.
 	 *
-	 * @param templatePath - Path to the EJS template file
+	 * @param templatePath - Path to the Handlebars template file
 	 * @param context - Template context
 	 * @returns Rendered template content
 	 */
@@ -57,13 +57,14 @@ export abstract class BaseGenerator {
 	 * @param filePath - Destination file path
 	 * @param content - File content
 	 * @param dryRun - If true, don't actually write the file
+	 * @returns WriteResult indicating success and conflict status
 	 */
 	protected async writeFile(
 		filePath: string,
 		content: string,
 		dryRun = false,
-	): Promise<void> {
-		await writeFile(filePath, content, {
+	): Promise<import('../utils/file-writer').WriteResult> {
+		return writeFile(filePath, content, {
 			dryRun,
 			force: false,
 		})
@@ -160,7 +161,7 @@ export abstract class BaseGenerator {
 	 *
 	 * @param files - Array of files to generate
 	 * @param dryRun - If true, don't actually write files
-	 * @returns Array of generated file paths
+	 * @returns Array of successfully generated file paths
 	 */
 	protected async generateFiles(
 		files: FileToGenerate[],
@@ -169,8 +170,11 @@ export abstract class BaseGenerator {
 		const generatedFiles: string[] = []
 
 		for (const file of files) {
-			await this.writeFile(file.path, file.content, dryRun)
-			generatedFiles.push(file.path)
+			const result = await this.writeFile(file.path, file.content, dryRun)
+			// Only add to list if write was successful
+			if (result.success) {
+				generatedFiles.push(file.path)
+			}
 		}
 
 		return generatedFiles

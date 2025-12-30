@@ -49,9 +49,14 @@ export class AdapterGenerator extends BaseGenerator {
 	 * Generate all adapter files.
 	 */
 	async generate(options: AdapterGeneratorOptions): Promise<GeneratorResult> {
+		// Get port name variations once if portName is provided
+		const portNameVariations = options.portName
+			? this.getNameVariations(options.portName)
+			: undefined
+
 		// Calculate import path from adapter to port directory
 		let portImportPath: string | undefined
-		if (options.portName && !options.portPath) {
+		if (portNameVariations && !options.portPath) {
 			const portsDir = this.config.output?.portsDir || 'ports'
 			const adaptersDir = this.config.output?.adaptersDir || 'adapters'
 
@@ -63,7 +68,7 @@ export class AdapterGenerator extends BaseGenerator {
 			// Adapter is at: {adaptersDir}/{adapterName}/adapter.ts
 			// Port is at: {portsDir}/{portName}/index.ts
 			// From adapter directory, we need to go up 2 levels then into ports
-			portImportPath = `../../${portsDirName}/${this.getNameVariations(options.portName).kebab}`
+			portImportPath = `../../${portsDirName}/${portNameVariations.kebab}`
 		}
 
 		const context = this.createTemplateContext(options, {
@@ -71,15 +76,14 @@ export class AdapterGenerator extends BaseGenerator {
 			portPath: options.portPath,
 			technology: options.technology,
 			// Infer port-related names if portName is provided
-			...(options.portName
+			...(portNameVariations
 				? {
-						portNameKebab: this.getNameVariations(options.portName).kebab,
-						portNamePascal: this.getNameVariations(options.portName).pascal,
-						portNameCamel: this.getNameVariations(options.portName).camel,
-						portNameScreamingSnake: this.getNameVariations(options.portName)
-							.screamingSnake,
-						portTokenName: `${this.getNameVariations(options.portName).screamingSnake}_${this.config.naming?.portSuffix || 'PORT'}`,
-						portInterfaceName: `${this.getNameVariations(options.portName).pascal}Port`,
+						portNameKebab: portNameVariations.kebab,
+						portNamePascal: portNameVariations.pascal,
+						portNameCamel: portNameVariations.camel,
+						portNameScreamingSnake: portNameVariations.screamingSnake,
+						portTokenName: `${portNameVariations.screamingSnake}_${this.config.naming?.portSuffix || 'PORT'}`,
+						portInterfaceName: `${portNameVariations.pascal}Port`,
 						// Import both token and interface from the port's index file
 						portImportPath: options.portPath || portImportPath,
 					}

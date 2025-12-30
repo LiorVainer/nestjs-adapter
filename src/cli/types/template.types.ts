@@ -1,7 +1,7 @@
 /**
  * Template context types
  *
- * This is the context object passed to EJS templates.
+ * This is the context object passed to Handlebars templates.
  * It extends GeneratorContext with additional template-specific fields.
  */
 
