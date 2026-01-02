@@ -4,7 +4,7 @@ This directory contains comprehensive, working examples demonstrating all APIs p
 
 ## Quick Start
 
-The examples are organized by complexity. Start with the basic examples (01-04) to understand core concepts, then explore the complete scenarios in the domain folders.
+The examples are organized by complexity. Start with the basic examples (01-03) to understand core concepts, then explore the complete scenarios in the domain folders.
 
 ### Type-Checking Examples
 
@@ -16,14 +16,13 @@ bun run type-check:examples
 
 ## Organization
 
-### Basic Examples (`01-04-*.ts`)
+### Basic Examples (`01-03-*.ts`)
 
 Foundational examples showing individual APIs in isolation:
 
 - `01-adapter-module-type.ts` - Understanding the `AdapterModule<TToken>` type
 - `02-decorator-basics.ts` - Using `@AdapterToken` and `@AdapterImpl` decorators
 - `03-inject-port.ts` - Injecting ports with `@InjectPort` decorator
-- `04-define-adapter-helper.ts` - Compile-time verification with `defineAdapter()`
 
 ### Complete Scenarios
 
@@ -78,7 +77,7 @@ Examples showing advanced customization techniques:
 
 ## Learning Path
 
-1. **Start here**: Read the basic examples (01-04) to understand core APIs
+1. **Start here**: Read the basic examples (01-03) to understand core APIs
 2. **Pick a scenario**: Choose either storage or rates to see a complete implementation
 3. **See integration**: Read the app integration examples to understand wiring
 4. **Learn testing**: Explore the testing examples for test patterns
