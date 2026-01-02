@@ -2,7 +2,7 @@ import { describe, expect, it, mock } from 'bun:test'
 import { Test } from '@nestjs/testing'
 import 'reflect-metadata'
 import { Injectable } from '@nestjs/common'
-import { Adapter, InjectPort, Port } from '../../src'
+import { Adapter, AdapterBase, InjectPort } from '../../src'
 import type { TestStoragePort } from '../fixtures/test-ports'
 import { TEST_STORAGE_TOKEN } from '../fixtures/test-tokens'
 
@@ -19,11 +19,11 @@ describe('Mock Adapter Patterns (Integration)', () => {
 			}
 		}
 
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorage,
 		})
-		class MockStorageAdapter extends Adapter<void> {}
+		class MockStorageAdapter extends AdapterBase<void> {}
 
 		it('should use mock adapter in tests', async () => {
 			@Injectable()

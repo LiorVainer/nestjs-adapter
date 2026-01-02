@@ -1,4 +1,4 @@
-import { Adapter, Port } from '../../src'
+import { Adapter, AdapterBase } from '../../src'
 import {
 	MockApiService,
 	MockCacheService,
@@ -12,36 +12,36 @@ import {
 
 /**
  * Mock adapter modules for testing.
- * These adapters use the @Port decorator pattern and can be used in tests.
+ * These adapters use the @Adapter decorator pattern and can be used in tests.
  */
 
 export type TestStorageOptions = {
 	prefix?: string
 }
 
-@Port({
-	token: TEST_STORAGE_TOKEN,
+@Adapter({
+	portToken: TEST_STORAGE_TOKEN,
 	implementation: MockStorageService,
 })
-export class TestStorageAdapter extends Adapter<TestStorageOptions> {}
+export class TestStorageAdapter extends AdapterBase<TestStorageOptions> {}
 
 export type TestApiOptions = {
 	baseUrl: string
 	timeout?: number
 }
 
-@Port({
-	token: TEST_API_TOKEN,
+@Adapter({
+	portToken: TEST_API_TOKEN,
 	implementation: MockApiService,
 })
-export class TestApiAdapter extends Adapter<TestApiOptions> {}
+export class TestApiAdapter extends AdapterBase<TestApiOptions> {}
 
 export type TestCacheOptions = {
 	defaultTtl: number
 }
 
-@Port({
-	token: TEST_CACHE_TOKEN,
+@Adapter({
+	portToken: TEST_CACHE_TOKEN,
 	implementation: MockCacheService,
 })
-export class TestCacheAdapter extends Adapter<TestCacheOptions> {}
+export class TestCacheAdapter extends AdapterBase<TestCacheOptions> {}

@@ -1,18 +1,18 @@
 /**
- * Example 02: Decorator Basics (@Port)
+ * Example 02: Decorator Basics (@Adapter)
  *
- * This example demonstrates how to use the @Port decorator
+ * This example demonstrates how to use the @Adapter decorator
  * to declare which port token an adapter provides and which implementation class it uses.
  *
  * Key Points:
- * - @Port({ token, implementation }) declares both the port token and implementation in one decorator
- * - This decorator stores metadata that is read by Adapter.register() and registerAsync()
- * - Decorator must be applied to classes extending Adapter<TOptions>
+ * - @Adapter({ portToken, implementation }) declares both the port token and implementation in one decorator
+ * - This decorator stores metadata that is read by AdapterBase.register() and registerAsync()
+ * - Decorator must be applied to classes extending AdapterBase<TOptions>
  * - Single decorator is cleaner than having two separate decorators
  */
 
 import { Injectable } from '@nestjs/common'
-import { Adapter, Port } from '../src'
+import { Adapter, AdapterBase } from '../src'
 
 // Step 1: Define a port token
 const EMAIL_PROVIDER = Symbol('EMAIL_PROVIDER')
@@ -44,14 +44,14 @@ class SendGridService implements EmailPort {
 	}
 }
 
-// Step 5: Create the adapter using @Port decorator
-@Port({
-	token: EMAIL_PROVIDER, // Declares: "I provide EMAIL_PROVIDER"
+// Step 5: Create the adapter using @Adapter decorator
+@Adapter({
+	portToken: EMAIL_PROVIDER, // Declares: "I provide EMAIL_PROVIDER"
 	implementation: SendGridService, // Declares: "I use SendGridService as implementation"
 })
-class SendGridAdapter extends Adapter<SendGridOptions> {
+class SendGridAdapter extends AdapterBase<SendGridOptions> {
 	// No additional code needed!
-	// The @Port decorator tells Adapter.register() what to do.
+	// The @Adapter decorator tells AdapterBase.register() what to do.
 }
 
 // Usage Example:
@@ -65,8 +65,8 @@ console.log('SendGrid adapter module:', sendGridModule)
 /**
  * What Happens Behind the Scenes:
  *
- * 1. @Port stores both EMAIL_PROVIDER (token) and SendGridService (implementation) in class metadata
- * 2. Adapter.register() reads this metadata and creates:
+ * 1. @Adapter stores both EMAIL_PROVIDER (portToken) and SendGridService (implementation) in class metadata
+ * 2. AdapterBase.register() reads this metadata and creates:
  *    {
  *      module: SendGridAdapter,
  *      providers: [
@@ -105,11 +105,11 @@ class SmtpService implements EmailPort {
 	}
 }
 
-@Port({
-	token: EMAIL_PROVIDER, // Same token, different implementation!
+@Adapter({
+	portToken: EMAIL_PROVIDER, // Same token, different implementation!
 	implementation: SmtpService,
 })
-class SmtpAdapter extends Adapter<SmtpOptions> {}
+class SmtpAdapter extends AdapterBase<SmtpOptions> {}
 
 const smtpModule = SmtpAdapter.register({
 	host: 'smtp.example.com',
@@ -121,15 +121,15 @@ const smtpModule = SmtpAdapter.register({
 console.log('SMTP adapter module:', smtpModule)
 
 /**
- * Why Use the @Port Decorator?
+ * Why Use the @Adapter Decorator?
  *
- * Without the decorator, you'd need to manually specify the token and implementation
- * in every register() call. The @Port decorator eliminates this repetition:
+ * Without the decorator, you'd need to manually specify the portToken and implementation
+ * in every register() call. The @Adapter decorator eliminates this repetition:
  *
  * ❌ Without decorator (verbose):
- * Adapter.register({ token: EMAIL_PROVIDER, impl: SendGridService, options: {...} })
+ * AdapterBase.register({ portToken: EMAIL_PROVIDER, impl: SendGridService, options: {...} })
  *
- * ✅ With @Port decorator (concise, declarative):
+ * ✅ With @Adapter decorator (concise, declarative):
  * SendGridAdapter.register({ apiKey: '...', fromEmail: '...' })
  *
  * Benefits:

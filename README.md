@@ -1,172 +1,28 @@
 # nest-hex
 
-> A tiny, **class-based**, **NestJS-native** helper library for building **pluggable adapters** following the Ports & Adapters (Hexagonal Architecture) pattern with minimal boilerplate and great developer experience.
+> A tiny, **class-based**, **NestJS-native** library for building **pluggable adapters** following the Ports & Adapters (Hexagonal Architecture) pattern with minimal boilerplate.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Why Hexagonal Architecture?
+## What is nest-hex?
 
-**Hexagonal Architecture (Ports & Adapters)** is a powerful pattern for building maintainable, testable, and adaptable applications. Here's why it matters:
+**nest-hex** eliminates boilerplate when building NestJS applications with the Ports & Adapters (Hexagonal Architecture) pattern. It provides decorators and base classes that handle all the repetitive wiring, letting you focus on business logic.
 
-### 🎯 Keep Domain Logic Pure
-Your business logic should never depend on infrastructure details like databases, APIs, or file systems. By defining **ports** (interfaces), your domain layer stays clean and focused on what matters: solving business problems.
+### Why Hexagonal Architecture?
 
-### 🔌 Pluggable Infrastructure
-Need to switch from AWS S3 to Google Cloud Storage? Replace MongoDB with PostgreSQL? Change from REST to GraphQL? With hexagonal architecture, you just swap the **adapter** – your domain logic never changes.
-
-### 🧪 Effortless Testing
-Mock external services by creating test adapters. No complex setup, no database connections, no API calls. Just simple, fast unit tests that focus on business logic.
-
-### 🌍 Environment Flexibility
-- **Development**: Use filesystem storage
-- **Testing**: Use in-memory mocks
-- **Production**: Use AWS S3
-
-Same domain code, different adapters. Configure once, swap anywhere.
-
-### 📦 Independent Deployment
-Infrastructure changes don't require redeploying your entire application. Update an adapter independently without touching core business logic.
-
-## Why This Library?
-
-Building NestJS applications with the Ports & Adapters pattern involves repetitive boilerplate:
-
-- Registering concrete implementation classes
-- Aliasing port tokens to implementations (`useExisting`)
-- Exporting only the port token (not provider objects)
-- Supporting both `register()` and `registerAsync()` patterns
-- Keeping the app responsible for configuration (no `process.env` in libraries)
-
-**nest-hex eliminates this boilerplate** while maintaining compile-time type safety and providing a delightful developer experience through both decorators and a powerful CLI.
+- 🧪 **Testable** - Mock infrastructure easily, test business logic in isolation
+- 🔌 **Swappable** - Switch from S3 to Azure Blob Storage without touching domain code
+- 🎯 **Clean** - Keep business logic free of infrastructure concerns
+- 🌍 **Flexible** - Use different adapters for dev, test, and production
 
 ## Features
 
-- 🎯 **Declarative**: Declare port tokens and implementations once using `@Port({ token, implementation })`
-- 🏗️ **Class-based**: Use standard NestJS dynamic modules, no function factories required
-- 🔒 **Type-safe**: `AdapterModule<TToken>` carries compile-time proof of which token it provides
-- ⚡ **Zero runtime overhead**: Uses TypeScript decorators and metadata, minimal abstraction
-- 📦 **Tiny**: Core library is under 1KB minified
-- 🧪 **Testable**: Easily mock adapters for testing
-- 🛠️ **Powerful CLI**: Generate ports, adapters, and services with a single command
-
-## CLI
-
-**nest-hex** includes a powerful CLI to scaffold ports, adapters, and services instantly. No more manual file creation!
-
-### Quick Start
-
-```bash
-# Initialize configuration
-npx nest-hex init
-
-# Generate a port (domain interface)
-npx nest-hex generate port ObjectStorage
-
-# Generate an adapter for the port
-npx nest-hex generate adapter S3 --port ObjectStorage
-
-# Generate both port and adapter together
-npx nest-hex generate full ObjectStorage S3
-
-# Generate a service that uses a port
-npx nest-hex generate service FileUpload
-```
-
-### Available Commands
-
-#### `init`
-Create a `nest-hex.config.ts` configuration file in your project.
-
-```bash
-npx nest-hex init
-```
-
-#### `generate` (or `g`)
-Generate ports, adapters, services, or complete modules.
-
-```bash
-# Generate a port
-npx nest-hex generate port <name>
-npx nest-hex g port PaymentGateway
-
-# Generate an adapter
-npx nest-hex generate adapter <name> --port <portName>
-npx nest-hex g adapter Stripe --port PaymentGateway
-
-# Generate both port and adapter
-npx nest-hex generate full <portName> <adapterName>
-npx nest-hex g full EmailService SendGrid
-
-# Generate a service
-npx nest-hex generate service <name>
-npx nest-hex g service UserRegistration
-```
-
-### Interactive Mode
-
-Run commands without arguments for interactive prompts:
-
-```bash
-npx nest-hex generate
-# → Select type: port, adapter, service, or full
-# → Enter name(s)
-# → Files generated!
-```
-
-### Configuration
-
-The CLI uses `nest-hex.config.ts` to customize output paths and naming conventions:
-
-```typescript
-// nest-hex.config.ts
-import { defineConfig } from 'nest-hex/cli';
-
-export default defineConfig({
-  output: {
-    portsDir: 'src/domain/ports',      // Where to generate ports
-    adaptersDir: 'src/infrastructure', // Where to generate adapters
-    servicesDir: 'src/application',    // Where to generate services
-  },
-  naming: {
-    portSuffix: 'Port',     // ObjectStoragePort
-    tokenSuffix: '_PORT',   // OBJECT_STORAGE_PORT
-    adapterSuffix: 'Adapter', // S3Adapter
-    serviceSuffix: 'Service', // FileUploadService
-  },
-});
-```
-
-### What Gets Generated
-
-#### Port Generation
-Creates a complete port with:
-- Token definition (`OBJECT_STORAGE_PORT`)
-- TypeScript interface with example methods
-- Service implementation with `@InjectPort`
-- Module that accepts adapters
-- Barrel exports (`index.ts`)
-
-#### Adapter Generation
-Creates a production-ready adapter with:
-- Implementation service class
-- Options interface
-- Adapter class with `@Port` decorator
-- Complete TypeScript types
-- Barrel exports
-
-#### Service Generation
-Creates a domain service with:
-- Service class with `@InjectPort` usage
-- Type-safe port injection
-- Example business logic methods
-
-### CLI Benefits
-
-✅ **Instant scaffolding** - Generate complete, type-safe modules in seconds
-✅ **Consistent structure** - All team members follow the same patterns
-✅ **Best practices built-in** - Generated code follows hexagonal architecture principles
-✅ **Customizable** - Configure paths and naming to match your project
-✅ **Interactive** - Friendly prompts guide you through generation
+- 🎯 **Declarative** - Declare port tokens and implementations once using `@Adapter({ portToken, implementation })`
+- 🏗️ **Class-based** - Standard NestJS dynamic modules, no function factories
+- 🔒 **Type-safe** - Compile-time proof that adapters provide the correct port tokens
+- ⚡ **Zero runtime overhead** - Uses TypeScript decorators and metadata
+- 📦 **Tiny** - Core library under 1KB minified
+- 🛠️ **Powerful CLI** - Generate ports, adapters, and services instantly
 
 ## Installation
 
@@ -180,8 +36,7 @@ pnpm add nest-hex
 bun add nest-hex
 ```
 
-### Peer Dependencies
-
+**Peer dependencies:**
 ```bash
 npm install @nestjs/common @nestjs/core reflect-metadata
 ```
@@ -192,11 +47,11 @@ npm install @nestjs/common @nestjs/core reflect-metadata
 
 ```typescript
 // storage.port.ts
-export const STORAGE_PORT = Symbol('STORAGE_PORT');
+export const STORAGE_PORT = Symbol('STORAGE_PORT')
 
 export interface StoragePort {
-  upload(file: Buffer, key: string): Promise<{ url: string }>;
-  download(key: string): Promise<Buffer>;
+  upload(key: string, data: Buffer): Promise<string>
+  download(key: string): Promise<Buffer>
 }
 ```
 
@@ -204,103 +59,116 @@ export interface StoragePort {
 
 ```typescript
 // s3.adapter.ts
-import { Injectable } from '@nestjs/common';
-import { Adapter, Port } from 'nest-hex';
-import { STORAGE_PORT, type StoragePort } from './storage.port';
+import { Injectable } from '@nestjs/common'
+import { Adapter } from 'nest-hex'
+import { STORAGE_PORT, type StoragePort } from './storage.port'
 
 // Implementation service
 @Injectable()
-class S3StorageService implements StoragePort {
-  async upload(file: Buffer, key: string) {
+class S3Service implements StoragePort {
+  constructor(private options: { bucket: string; region: string }) {}
+
+  async upload(key: string, data: Buffer): Promise<string> {
     // AWS S3 upload logic here
-    return { url: `https://s3.amazonaws.com/bucket/${key}` };
+    return `https://s3.amazonaws.com/${this.options.bucket}/${key}`
   }
 
-  async download(key: string) {
+  async download(key: string): Promise<Buffer> {
     // AWS S3 download logic here
-    return Buffer.from('file contents');
+    return Buffer.from('file contents')
   }
-}
-
-// Adapter configuration
-interface S3Options {
-  bucket: string;
-  region: string;
-  accessKeyId?: string;
-  secretAccessKey?: string;
 }
 
 // Adapter module - single decorator declares everything!
-@Port({
-  token: STORAGE_PORT,
-  implementation: S3StorageService,
+@Adapter({
+  portToken: STORAGE_PORT,
+  implementation: S3Service
 })
-export class S3Adapter extends Adapter<S3Options> {}
+export class S3Adapter extends AdapterBase<{ bucket: string; region: string }> {}
 ```
 
-### 3. Create a Port Module (Domain Service)
+### 3. Create a Domain Service
 
 ```typescript
-// storage.module.ts
-import { Injectable, Module } from '@nestjs/common';
-import { InjectPort, PortModule } from 'nest-hex';
-import { STORAGE_PORT, type StoragePort } from './storage.port';
+// file.service.ts
+import { Injectable } from '@nestjs/common'
+import { InjectPort } from 'nest-hex'
+import { STORAGE_PORT, type StoragePort } from './storage.port'
 
-// Domain service that uses the port
 @Injectable()
-export class StorageService {
+export class FileService {
   constructor(
     @InjectPort(STORAGE_PORT)
-    private readonly storage: StoragePort,
+    private readonly storage: StoragePort
   ) {}
 
-  async uploadUserAvatar(userId: string, image: Buffer) {
-    const key = `avatars/${userId}.jpg`;
-    return this.storage.upload(image, key);
-  }
-
-  async downloadUserAvatar(userId: string) {
-    const key = `avatars/${userId}.jpg`;
-    return this.storage.download(key);
+  async uploadUserAvatar(userId: string, image: Buffer): Promise<string> {
+    const key = `avatars/${userId}.jpg`
+    return this.storage.upload(key, image)
   }
 }
-
-// Port module that accepts any adapter
-@Module({})
-export class StorageModule extends PortModule<typeof StorageService> {}
 ```
 
-### 4. Wire It Up in Your App
+### 4. Create a Port Module
+
+```typescript
+// file.module.ts
+import { Module } from '@nestjs/common'
+import { PortModule } from 'nest-hex'
+import { FileService } from './file.service'
+
+@Module({})
+export class FileModule extends PortModule<typeof FileService> {}
+```
+
+### 5. Wire It Up
 
 ```typescript
 // app.module.ts
-import { Module } from '@nestjs/common';
-import { StorageModule } from './storage/storage.module';
-import S3Adapter from './storage/adapters/s3.adapter';
+import { Module } from '@nestjs/common'
+import { FileModule } from './file.module'
+import { S3Adapter } from './s3.adapter'
 
 @Module({
   imports: [
-    StorageModule.register({
+    FileModule.register({
       adapter: S3Adapter.register({
-        bucket: 'my-app-uploads',
-        region: 'us-east-1',
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      }),
-    }),
-  ],
+        bucket: process.env.S3_BUCKET || 'my-bucket',
+        region: process.env.AWS_REGION || 'us-east-1'
+      })
+    })
+  ]
 })
 export class AppModule {}
 ```
 
 That's it! You now have a fully type-safe, pluggable storage adapter. 🎉
 
+## CLI
+
+Generate ports, adapters, and services instantly with the built-in CLI:
+
+```bash
+# Initialize configuration
+npx nest-hex init
+
+# Generate a port (domain interface)
+npx nest-hex generate port ObjectStorage
+
+# Generate an adapter for the port
+npx nest-hex generate adapter S3 --port ObjectStorage
+
+# Or generate both at once
+npx nest-hex generate full ObjectStorage S3
+```
+
+**See [CLI Documentation](./docs/cli.md) for complete command reference, configuration options, and template customization.**
+
 ## Key Benefits
 
 ### Before (Manual Boilerplate)
 
 ```typescript
-// Lots of manual wiring...
 @Module({})
 export class S3StorageModule {
   static register(options: S3Options): DynamicModule {
@@ -312,7 +180,7 @@ export class S3StorageModule {
         // More boilerplate...
       ],
       exports: [STORAGE_PORT],
-    };
+    }
   }
 }
 ```
@@ -320,267 +188,109 @@ export class S3StorageModule {
 ### After (With nest-hex)
 
 ```typescript
-// Clean and declarative!
-@Port({
-  token: STORAGE_PORT,
-  implementation: S3StorageService,
+@Adapter({
+  portToken: STORAGE_PORT,
+  implementation: S3StorageService
 })
-export class S3Adapter extends Adapter<S3Options> {}
+export class S3Adapter extends AdapterBase<S3Options> {}
 ```
 
-## Advanced Usage
+## Swappable Infrastructure
 
-### Async Registration with Dependency Injection
+The real power: swap infrastructure without touching business logic.
 
 ```typescript
-import { ConfigModule, ConfigService } from '@nestjs/config';
+// Development: Use local filesystem
+const adapter = process.env.NODE_ENV === 'production'
+  ? S3Adapter.register({ bucket: 'prod-bucket', region: 'us-east-1' })
+  : LocalStorageAdapter.register({ basePath: './uploads' })
 
 @Module({
+  imports: [FileModule.register({ adapter })]
+})
+export class AppModule {}
+```
+
+Your `FileService` business logic **never changes**. Only the adapter changes.
+
+## Advanced Features
+
+### Async Configuration with Dependency Injection
+
+```typescript
+@Module({
   imports: [
-    StorageModule.register({
+    FileModule.register({
       adapter: S3Adapter.registerAsync({
         imports: [ConfigModule],
         inject: [ConfigService],
         useFactory: (config: ConfigService) => ({
-          bucket: config.get('S3_BUCKET'),
-          region: config.get('AWS_REGION'),
-          accessKeyId: config.get('AWS_ACCESS_KEY_ID'),
-          secretAccessKey: config.get('AWS_SECRET_ACCESS_KEY'),
-        }),
-      }),
-    }),
-  ],
+          bucket: config.get('S3_BUCKET')!,
+          region: config.get('AWS_REGION')!
+        })
+      })
+    })
+  ]
 })
 export class AppModule {}
 ```
 
-### Custom Imports and Extra Ports
+### Adapters with Dependencies
 
 ```typescript
-@Port({
-  token: HTTP_CLIENT_PORT,
+@Adapter({
+  portToken: HTTP_CLIENT_PORT,
   implementation: AxiosHttpClient,
+  imports: [HttpModule],
+  providers: [
+    { provide: 'HTTP_CONFIG', useValue: { timeout: 5000 } }
+  ]
 })
-class AxiosAdapterClass extends Adapter<AxiosOptions> {
-  protected override imports(options: AxiosOptions) {
-    return [
-      HttpModule.register({
-        baseURL: options.baseUrl,
-        timeout: options.timeout,
-      }),
-    ];
+export class AxiosAdapter extends AdapterBase<AxiosOptions> {}
+```
+
+### Mock Adapters for Testing
+
+```typescript
+@Injectable()
+class MockStorageService implements StoragePort {
+  async upload(key: string, data: Buffer): Promise<string> {
+    return `mock://storage/${key}`
   }
-
-  protected override extraPoviders(options: AxiosOptions) {
-    return [
-      {
-        provide: 'HTTP_CLIENT_CONFIG',
-        useValue: options,
-      },
-    ];
-  }
-}
-```
-
-### Swapping Adapters - The Power of Pluggability
-
-**This is the core benefit of hexagonal architecture**: swap infrastructure without touching business logic.
-
-#### Environment-Based Swapping
-
-```typescript
-// Development: Use filesystem storage
-import FilesystemAdapter from './storage/adapters/filesystem.adapter';
-
-// Production: Use AWS S3
-import S3Adapter from './storage/adapters/s3.adapter';
-
-const adapter = process.env.NODE_ENV === 'production'
-  ? S3Adapter.register({ bucket: 'prod-bucket', region: 'us-east-1' })
-  : FilesystemAdapter.register({ basePath: './uploads' });
-
-@Module({
-  imports: [
-    StorageModule.register({ adapter }),
-  ],
-})
-export class AppModule {}
-```
-
-#### Multi-Cloud Strategy
-
-```typescript
-// Easily switch cloud providers without changing domain code
-const storageAdapter = process.env.CLOUD_PROVIDER === 'aws'
-  ? S3Adapter.register({ bucket: 'my-bucket', region: 'us-east-1' })
-  : process.env.CLOUD_PROVIDER === 'gcp'
-  ? GCSAdapter.register({ bucket: 'my-bucket' })
-  : AzureBlobAdapter.register({ containerName: 'my-container' });
-```
-
-#### Feature Flags
-
-```typescript
-// Gradually migrate to new infrastructure
-const emailAdapter = featureFlags.useNewEmailProvider
-  ? SendGridAdapter.register({ apiKey: process.env.SENDGRID_KEY })
-  : SESAdapter.register({ region: 'us-east-1' });
-```
-
-#### Testing with Mocks
-
-```typescript
-// Test module: in-memory mock
-const testAdapter = MockStorageAdapter.register();
-
-// Production module: real infrastructure
-const prodAdapter = S3Adapter.register({ bucket: 'prod' });
-
-// Same domain code, different runtime behavior
-```
-
-**Key Point**: Your `StorageService` business logic **never changes**. Only the infrastructure adapter changes. This is the essence of maintainable architecture.
-
-### Testing with Mock Adapters
-
-```typescript
-import { Adapter, Port } from 'nest-hex';
-
-class MockStorageService {
-  async upload(file: Buffer, key: string) {
-    return { url: `mock://storage/${key}` };
-  }
-
-  async download(key: string) {
-    return Buffer.from('mock file contents');
+  async download(key: string): Promise<Buffer> {
+    return Buffer.from('mock data')
   }
 }
 
-@Port({
-  token: STORAGE_PORT,
-  implementation: MockStorageService,
+@Adapter({
+  portToken: STORAGE_PORT,
+  implementation: MockStorageService
 })
-export class MockStorageAdapter extends Adapter<void> {}
+export class MockStorageAdapter extends AdapterBase<{}> {}
 
 // Use in tests
 const module = await Test.createTestingModule({
   imports: [
-    StorageModule.register({
-      adapter: MockStorageAdapter.register(undefined),
-    }),
-  ],
-}).compile();
+    FileModule.register({
+      adapter: MockStorageAdapter.register({})
+    })
+  ]
+}).compile()
 ```
 
-## API Reference
+## Documentation
 
-### Core Classes
+📚 **Complete Documentation:**
+- **[Library Documentation](./docs/library.md)** - Full API reference, architecture guide, advanced patterns, and examples
+- **[CLI Documentation](./docs/cli.md)** - Complete CLI reference, configuration, templates, and best practices
 
-#### `Adapter<TOptions>`
-
-Abstract base class for building adapter modules.
-
-**Methods:**
-- `static register<TToken, TOptions>(options: TOptions): AdapterModule<TToken>` - Synchronous registration
-- `static registerAsync<TToken, TOptions>(config: AsyncConfig): AdapterModule<TToken>` - Async registration with DI
-
-**Protected Hooks:**
-- `protected imports(options?: TOptions): unknown[]` - Override to import other NestJS modules
-- `protected extraPoviders(options: TOptions): Port[]` - Override to add additional providers
-
-#### `PortModule<TService>`
-
-Abstract base class for building port modules that consume adapters.
-
-**Methods:**
-- `static register<TToken>({ adapter }: { adapter?: AdapterModule<TToken> }): DynamicModule`
-
-### Decorators
-
-#### `@Port({ token, implementation })`
-
-Class decorator that declares which port token an adapter provides and its implementation class.
-
-**Parameters:**
-- `token: TToken` - The port token (usually a Symbol)
-- `implementation: Type<unknown>` - The concrete implementation class
-
-**Example:**
-```typescript
-@Port({
-  token: STORAGE_PORT,
-  implementation: S3StorageService,
-})
-class S3Adapter extends Adapter<S3Options> {}
-```
-
-#### `@InjectPort(token)`
-
-Parameter decorator for injecting a port token into service constructors.
-
-**Example:**
-```typescript
-constructor(
-  @InjectPort(STORAGE_PORT)
-  private readonly storage: StoragePort,
-) {}
-```
-
-### Types
-
-#### `AdapterModule<TToken>`
-
-A DynamicModule that carries compile-time proof it provides `TToken`.
-
-```typescript
-type AdapterModule<TToken> = DynamicModule & {
-  __provides: TToken;
-};
-```
-
-## Best Practices
-
-### ✅ Do's
-
-- **Export port tokens, not provider objects**
-  ```typescript
-  exports: [STORAGE_PORT]  // ✅ Correct
-  ```
-
-- **Keep configuration in the app layer**
-  ```typescript
-  // ✅ Good: App provides config
-  S3Adapter.register({
-    bucket: process.env.S3_BUCKET,
-  })
-  ```
-
-- **Use `@InjectPort` for clarity**
-  ```typescript
-  @InjectPort(STORAGE_PORT)  // ✅ Clear intent
-  ```
-
-- **Create small, focused adapters**
-  - One adapter = one infrastructure concern
-
-### ❌ Don'ts
-
-- **Don't export provider objects**
-  ```typescript
-  exports: [{ provide: STORAGE_PORT, useExisting: S3Service }]  // ❌ Wrong
-  ```
-
-- **Don't use `process.env` in adapters**
-  ```typescript
-  // ❌ Bad: Config hard-coded in adapter
-  class S3Adapter {
-    bucket = process.env.S3_BUCKET;
-  }
-  ```
-
-- **Don't mix domain logic with adapters**
-  - Adapters = infrastructure only
-  - Domain logic = port modules/services
+📖 **Quick Links:**
+- [Core Concepts](./docs/library.md#core-concepts) - Understand ports, adapters, and services
+- [Why Hexagonal Architecture?](./docs/library.md#why-hexagonal-architecture) - Benefits with code examples
+- [Architecture Overview](./docs/library.md#architecture-overview) - Visual diagrams
+- [API Reference](./docs/library.md#api-reference) - Complete API documentation
+- [Testing Guide](./docs/library.md#testing) - Mock adapters and integration testing
+- [Migration Guide](./docs/library.md#migration-guide) - Upgrading from @Port to @Adapter
 
 ## Examples
 
@@ -588,17 +298,16 @@ See the [`examples/`](./examples) directory for complete working examples:
 
 - **Object Storage** - S3 adapter with file upload/download
 - **Currency Rates** - HTTP API adapter with rate conversion
-- **Basic Examples** - Decorator usage patterns
-
-## Documentation
-
-- 📖 [Full Specification](./spec/spec.md) - Complete implementation guide with AWS S3 and HTTP API examples
-- 🔧 [API Reference](#api-reference) - Detailed API documentation
+- **Mock Patterns** - Testing with mock adapters
 
 ## License
 
-MIT
+MIT © [Your Name]
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
+Contributions are welcome! Please read our [Contributing Guide](./CONTRIBUTING.md) for details on our code of conduct and development process.
+
+---
+
+**Built with ❤️ for the NestJS community**

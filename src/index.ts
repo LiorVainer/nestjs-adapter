@@ -1,7 +1,7 @@
 // Core base classes
-export { Adapter } from './core/adapter.base'
+export { AdapterBase } from './core/adapter.base'
 // Decorators
-export { InjectPort, Port } from './core/decorators'
+export { Adapter, InjectPort } from './core/decorators'
 // Module helpers
 export { PortModule } from './core/port-module.base'
 // Type definitions

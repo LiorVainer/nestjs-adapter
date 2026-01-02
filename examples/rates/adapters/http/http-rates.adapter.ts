@@ -6,7 +6,7 @@
  */
 
 import type { Provider } from '@nestjs/common'
-import { Adapter, Port } from '../../../../src'
+import { Adapter, AdapterBase } from '../../../../src'
 import { CURRENCY_RATES_PROVIDER } from '../../currency-rates.token'
 import { HttpRatesService } from './http-rates.service'
 import type { HttpRatesOptions } from './http-rates.types'
@@ -39,11 +39,11 @@ import type { HttpRatesOptions } from './http-rates.types'
  * })
  * ```
  */
-@Port({
-	token: CURRENCY_RATES_PROVIDER,
+@Adapter({
+	portToken: CURRENCY_RATES_PROVIDER,
 	implementation: HttpRatesService,
 })
-class HttpRatesAdapter extends Adapter<HttpRatesOptions> {
+class HttpRatesAdapter extends AdapterBase<HttpRatesOptions> {
 	/**
 	 * Optional: Override imports() to add HttpModule dependency.
 	 *
@@ -58,11 +58,11 @@ class HttpRatesAdapter extends Adapter<HttpRatesOptions> {
 	}
 
 	/**
-	 * Optional: Override extraPoviders() to add helper providers.
+	 * Optional: Override extraProviders() to add helper providers.
 	 *
 	 * Example: Add a logger or retry handler:
 	 */
-	protected override extraPoviders(_options: HttpRatesOptions): Provider[] {
+	protected override extraProviders(_options: HttpRatesOptions): Provider[] {
 		// Example: Add a custom HTTP client with retry logic
 		// return [
 		//   {

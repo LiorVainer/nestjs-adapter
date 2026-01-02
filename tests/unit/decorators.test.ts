@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import 'reflect-metadata'
-import { Adapter, InjectPort, Port } from '../../src'
+import { Adapter, AdapterBase, InjectPort } from '../../src'
 import {
 	PORT_IMPLEMENTATION_METADATA,
 	PORT_TOKEN_METADATA,
@@ -10,22 +10,22 @@ import { TEST_API_TOKEN, TEST_STORAGE_TOKEN } from '../fixtures/test-tokens'
 
 describe('@Port decorator', () => {
 	it('should store token metadata', () => {
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<void> {}
+		class TestAdapter extends AdapterBase<void> {}
 
 		const token = Reflect.getMetadata(PORT_TOKEN_METADATA, TestAdapter)
 		expect(token).toBe(TEST_STORAGE_TOKEN)
 	})
 
 	it('should store implementation metadata', () => {
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<void> {}
+		class TestAdapter extends AdapterBase<void> {}
 
 		const implementation = Reflect.getMetadata(
 			PORT_IMPLEMENTATION_METADATA,
@@ -35,11 +35,11 @@ describe('@Port decorator', () => {
 	})
 
 	it('should store both token and implementation', () => {
-		@Port({
-			token: TEST_API_TOKEN,
+		@Adapter({
+			portToken: TEST_API_TOKEN,
 			implementation: MockApiService,
 		})
-		class TestAdapter extends Adapter<void> {}
+		class TestAdapter extends AdapterBase<void> {}
 
 		const token = Reflect.getMetadata(PORT_TOKEN_METADATA, TestAdapter)
 		const implementation = Reflect.getMetadata(
@@ -52,17 +52,17 @@ describe('@Port decorator', () => {
 	})
 
 	it('should work with different adapters independently', () => {
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class StorageAdapter extends Adapter<void> {}
+		class StorageAdapter extends AdapterBase<void> {}
 
-		@Port({
-			token: TEST_API_TOKEN,
+		@Adapter({
+			portToken: TEST_API_TOKEN,
 			implementation: MockApiService,
 		})
-		class ApiAdapter extends Adapter<void> {}
+		class ApiAdapter extends AdapterBase<void> {}
 
 		const storageToken = Reflect.getMetadata(
 			PORT_TOKEN_METADATA,

@@ -1,70 +1,12 @@
-/**
- * {{namePascal}} Adapter
- *
- * This adapter provides {{namePascal}} capabilities{{#if portName}} using {{portName}}{{/if}}.
- * It uses the decorator-driven API for minimal boilerplate.
- *
- * Key Points:
- * - Extends Adapter<{{namePascal}}Options>
- * - Uses @Port to declare the token and implementation
- * - Provides compile-time type safety through static methods
- */
-
-import { Adapter, Port } from '{{coreImportPath}}'
+import { Adapter, AdapterBase } from '{{coreImportPath}}'
 {{#if portTokenName}}
 import { {{portTokenName}} } from '{{portImportPath}}'
 {{/if}}
 import { {{namePascal}}Service } from './{{nameKebab}}.service'
 import type { {{namePascal}}Options } from './{{nameKebab}}.types'
 
-/**
- * {{namePascal}} adapter{{#if portName}} for {{portName}}{{/if}}.
- *
- * Usage Example (Synchronous):
- * ```typescript
- * {{namePascal}}Adapter.register({
- *   // Add configuration options here
- * })
- * ```
- *
- * Usage Example (Asynchronous with DI):
- * ```typescript
- * {{namePascal}}Adapter.registerAsync({
- *   imports: [ConfigModule],
- *   inject: [ConfigService],
- *   useFactory: (config: ConfigService) => ({
- *     // Add configuration from ConfigService
- *   })
- * })
- * ```
- */
-@Port({
-	token: {{#if portTokenName}}{{portTokenName}}{{else}}{{nameScreamingSnake}}_PORT{{/if}},
+@Adapter({
+	portToken: {{#if portTokenName}}{{portTokenName}}{{else}}{{nameScreamingSnake}}_PORT{{/if}},
 	implementation: {{namePascal}}Service,
 })
-export class {{namePascal}}Adapter extends Adapter<{{namePascal}}Options> {
-	// No additional code needed!
-	// The decorators and base class handle everything:
-	// - Token registration
-	// - Implementation provider
-	// - Export configuration
-	// - Type safety
-
-	/**
-	 * Optional: Override imports() to add module dependencies.
-	 *
-	 * Uncomment this if your service needs HttpModule or other modules:
-	 */
-	// protected override imports(options: {{namePascal}}Options): unknown[] {
-	//   return [];
-	// }
-
-	/**
-	 * Optional: Override extraProviders() to add helper services.
-	 *
-	 * Uncomment this if you need additional providers:
-	 */
-	// protected override extraProviders(options: {{namePascal}}Options): Provider[] {
-	//   return [];
-	// }
-}
+export class {{namePascal}}Adapter extends AdapterBase<{{namePascal}}Options> {}

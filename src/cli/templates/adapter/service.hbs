@@ -1,28 +1,10 @@
-/**
- * {{namePascal}} Service Implementation
- *
- * This service implements the {{#if portName}}{{portName}}{{else}}{{namePascal}}{{/if}}Port interface{{#if technology}} using {{technology}}{{/if}}.
- */
-
 import { Injectable } from '@nestjs/common'
 {{#if portInterfaceName}}
 import type { {{portInterfaceName}} } from '{{portImportPath}}'
 {{/if}}
 import type { {{namePascal}}Options } from './{{nameKebab}}.types'
 
-/**
- * {{namePascal}} service implementation.
- */
 @Injectable()
 export class {{namePascal}}Service{{#if portInterfaceName}} implements {{portInterfaceName}}{{/if}} {
 	constructor(private readonly options: {{namePascal}}Options) {}
-
-	/**
-	 * TODO: Implement {{#if portInterfaceName}}{{portInterfaceName}}{{else}}{{namePascal}}Port{{/if}} interface methods here
-	 *
-	 * Example:
-	 * async getData(id: string): Promise<Data> {
-	 *   // Implementation using this.options
-	 * }
-	 */
 }

@@ -65,7 +65,7 @@ Examples showing how to wire adapters and feature modules in a NestJS applicatio
 Examples demonstrating testing patterns for adapters and feature modules:
 
 - `testing/mock-adapter.test.ts` - Creating mock adapters for testing
-- `testing/override-provider.test.ts` - Using NestJS testing module overrides
+- `testing/override-port.test.ts` - Using NestJS testing module overrides
 - `testing/test-module.test.ts` - Complete test module setup
 
 ### Advanced Patterns (`advanced/`)
@@ -73,7 +73,7 @@ Examples demonstrating testing patterns for adapters and feature modules:
 Examples showing advanced customization techniques:
 
 - `advanced/custom-imports.ts` - Overriding `imports()` to add module dependencies
-- `advanced/extra-providers.ts` - Overriding `extraPoviders()` to add helper services
+- `advanced/extra-ports.ts` - Overriding `extraPoviders()` to add helper services
 - `advanced/multiple-adapters.ts` - Using multiple adapters for the same port
 
 ## Learning Path

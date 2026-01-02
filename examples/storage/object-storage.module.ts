@@ -81,11 +81,11 @@ export class ObjectStorageModule extends PortModule<
  * Example Usage in Tests:
  *
  * ```typescript
- * @Port({
- *   token: OBJECT_STORAGE_PROVIDER,
+ * @Adapter({
+ *   portToken: OBJECT_STORAGE_PROVIDER,
  *   implementation: MockObjectStorageService
  * })
- * class MockAdapterClass extends Adapter<{}> {}
+ * class MockAdapterClass extends AdapterBase<{}> {}
  *
  * const mockAdapter = defineAdapter<typeof OBJECT_STORAGE_PROVIDER, {}>()(
  *   MockAdapterClass

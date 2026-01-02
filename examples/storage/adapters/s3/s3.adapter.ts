@@ -10,7 +10,7 @@
  * - Provides compile-time type safety through static methods
  */
 
-import { Adapter, Port } from '../../../../src'
+import { Adapter, AdapterBase } from '../../../../src'
 import { OBJECT_STORAGE_TOKEN } from '../../object-storage.token'
 import { S3ObjectStorageService } from './s3.service'
 import type { S3Options } from './s3.types'
@@ -46,11 +46,11 @@ import type { S3Options } from './s3.types'
  * })
  * ```
  */
-@Port({
-	token: OBJECT_STORAGE_TOKEN,
+@Adapter({
+	portToken: OBJECT_STORAGE_TOKEN,
 	implementation: S3ObjectStorageService,
 })
-export class S3Adapter extends Adapter<S3Options> {
+export class S3Adapter extends AdapterBase<S3Options> {
 	// No additional code needed!
 	// The decorators and base class handle everything:
 	// - Token registration
@@ -66,11 +66,11 @@ export class S3Adapter extends Adapter<S3Options> {
 	//   return [HttpModule];
 	// }
 	/**
-	 * Optional: Override extraPoviders() to add helper services.
+	 * Optional: Override extraProviders() to add helper services.
 	 *
 	 * Uncomment this if you need additional providers:
 	 */
-	// protected override extraPoviders(options: S3Options): Port[] {
+	// protected override extraProviders(options: S3Options): Provider[] {
 	//   return [
 	//     {
 	//       provide: 'S3_CLIENT_FACTORY',

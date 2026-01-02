@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'bun:test'
 import 'reflect-metadata'
-import { Adapter, Port } from '../../src'
+import { Adapter, AdapterBase } from '../../src'
 import { MockStorageService } from '../fixtures/test-services'
 import { TEST_STORAGE_TOKEN } from '../fixtures/test-tokens'
 
 describe('Adapter.registerAsync()', () => {
 	it('should return a DynamicModule with correct structure', () => {
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<{ prefix: string }> {}
+		class TestAdapter extends AdapterBase<{ prefix: string }> {}
 
 		const module = TestAdapter.registerAsync({
 			useFactory: () => ({ prefix: 'async-' }),
@@ -24,11 +24,11 @@ describe('Adapter.registerAsync()', () => {
 	})
 
 	it('should include implementation class as a provider', () => {
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<{ prefix: string }> {}
+		class TestAdapter extends AdapterBase<{ prefix: string }> {}
 
 		const module = TestAdapter.registerAsync({
 			useFactory: () => ({ prefix: 'async-' }),
@@ -38,11 +38,11 @@ describe('Adapter.registerAsync()', () => {
 	})
 
 	it('should alias port token to implementation using useExisting', () => {
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<{ prefix: string }> {}
+		class TestAdapter extends AdapterBase<{ prefix: string }> {}
 
 		const module = TestAdapter.registerAsync({
 			useFactory: () => ({ prefix: 'async-' }),
@@ -63,11 +63,11 @@ describe('Adapter.registerAsync()', () => {
 	})
 
 	it('should export only the port token', () => {
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<{ prefix: string }> {}
+		class TestAdapter extends AdapterBase<{ prefix: string }> {}
 
 		const module = TestAdapter.registerAsync({
 			useFactory: () => ({ prefix: 'async-' }),
@@ -80,11 +80,11 @@ describe('Adapter.registerAsync()', () => {
 		class ConfigModule {}
 		const mockImport = ConfigModule
 
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<{ prefix: string }> {}
+		class TestAdapter extends AdapterBase<{ prefix: string }> {}
 
 		const module = TestAdapter.registerAsync({
 			imports: [mockImport],
@@ -97,11 +97,11 @@ describe('Adapter.registerAsync()', () => {
 	it('should accept inject option for dependency injection', () => {
 		const CONFIG_TOKEN = Symbol('CONFIG')
 
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<{ prefix: string }> {}
+		class TestAdapter extends AdapterBase<{ prefix: string }> {}
 
 		const module = TestAdapter.registerAsync({
 			inject: [CONFIG_TOKEN],
@@ -112,14 +112,14 @@ describe('Adapter.registerAsync()', () => {
 		// Note: actual DI resolution is tested in integration tests
 	})
 
-	it('should throw error when @Port decorator is missing', () => {
-		class InvalidAdapter extends Adapter<void> {}
+	it('should throw error when @Adapter decorator is missing', () => {
+		class InvalidAdapter extends AdapterBase<void> {}
 
 		expect(() =>
 			InvalidAdapter.registerAsync({
 				useFactory: () => undefined,
 			}),
-		).toThrow(/must be decorated with @Port/)
+		).toThrow(/must be decorated with @Adapter/)
 	})
 
 	it('should merge imports from adapter imports() hook and options', () => {
@@ -128,11 +128,11 @@ describe('Adapter.registerAsync()', () => {
 		const optionImports = [OptionModule]
 		const adapterImports = [AdapterModule]
 
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<{ prefix: string }> {
+		class TestAdapter extends AdapterBase<{ prefix: string }> {
 			protected override imports() {
 				return adapterImports
 			}
@@ -148,11 +148,11 @@ describe('Adapter.registerAsync()', () => {
 	})
 
 	it('should work with async factory function', () => {
-		@Port({
-			token: TEST_STORAGE_TOKEN,
+		@Adapter({
+			portToken: TEST_STORAGE_TOKEN,
 			implementation: MockStorageService,
 		})
-		class TestAdapter extends Adapter<{ prefix: string }> {}
+		class TestAdapter extends AdapterBase<{ prefix: string }> {}
 
 		const module = TestAdapter.registerAsync({
 			useFactory: async () => {
