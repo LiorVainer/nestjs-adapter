@@ -1,6 +1,6 @@
 {
 	"name": "nest-hex",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"description": "A tiny NestJS-native library for building pluggable adapters (Ports & Adapters / Hexagonal) using class-based Dynamic Modules, with great DX and strong type safety.",
 	"homepage": "https://github.com/LiorVainer/nest-hex#readme",
 	"bugs": {
