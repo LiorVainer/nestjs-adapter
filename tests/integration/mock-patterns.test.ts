@@ -10,8 +10,10 @@ describe('Mock Adapter Patterns (Integration)', () => {
 	describe('Mock adapter for testing', () => {
 		@Injectable()
 		class MockStorage implements TestStoragePort {
-			async save(_key: string, _value: string): Promise<void> {
-				// Mock implementation - does nothing
+			private store = new Map<string, string>()
+
+			async save(key: string, value: string): Promise<void> {
+				this.store.set(key, value)
 			}
 
 			async load(_key: string): Promise<string | null> {
@@ -53,7 +55,7 @@ describe('Mock Adapter Patterns (Integration)', () => {
 	describe('.overrideProvider() pattern', () => {
 		it('should override port token with mock', async () => {
 			const mockStorage: TestStoragePort = {
-				save: mock(async () => {}),
+				save: mock(async () => Promise.resolve()),
 				load: mock(async () => 'overridden-value'),
 			}
 
@@ -88,7 +90,7 @@ describe('Mock Adapter Patterns (Integration)', () => {
 
 		it('should override adapter provider in testing module', async () => {
 			const mockImplementation: TestStoragePort = {
-				save: mock(async () => {}),
+				save: mock(async () => Promise.resolve()),
 				load: mock(async () => 'test-override'),
 			}
 
@@ -135,7 +137,7 @@ describe('Mock Adapter Patterns (Integration)', () => {
 			const CONFIG = Symbol('CONFIG')
 
 			const mockStorage: TestStoragePort = {
-				save: mock(async () => {}),
+				save: mock(async () => Promise.resolve()),
 				load: mock(async (key: string) => `config-${key}`),
 			}
 

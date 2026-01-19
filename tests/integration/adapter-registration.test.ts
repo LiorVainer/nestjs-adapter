@@ -57,7 +57,7 @@ describe('Adapter Registration (Integration)', () => {
 			const multiModule = await Test.createTestingModule({
 				imports: [
 					TestStorageAdapter.register({ prefix: 'storage-' }),
-					TestApiAdapter.register({ baseUrl: 'https://api.test.com' }),
+					TestApiAdapter.register({ baseUrl: 'http://localhost:3000/api' }),
 				],
 			}).compile()
 
