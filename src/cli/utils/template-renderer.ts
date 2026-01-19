@@ -6,11 +6,14 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import Handlebars from 'handlebars'
-import type { TemplateContext } from '../types'
 
+/**
+ * Render a Handlebars template with the given context.
+ * Accepts any object as context - Handlebars will use available properties.
+ */
 export async function renderTemplate(
 	templatePath: string,
-	context: TemplateContext,
+	context: Record<string, unknown>,
 ): Promise<string> {
 	try {
 		// Check if file exists before reading - use Bun API if available
@@ -62,9 +65,13 @@ export async function renderTemplate(
 	}
 }
 
+/**
+ * Render a template string with the given context.
+ * Accepts any object as context - Handlebars will use available properties.
+ */
 export async function renderTemplateString(
 	templateString: string,
-	context: TemplateContext,
+	context: Record<string, unknown>,
 ): Promise<string> {
 	try {
 		const template = Handlebars.compile(templateString)
