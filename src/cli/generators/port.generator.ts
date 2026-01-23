@@ -30,71 +30,109 @@ export class PortGenerator extends BaseGenerator {
 		const context = this.createTemplateContext(options)
 		const templateDir = this.getTemplateDir('port')
 
+		// Get file case from config
+		const fileCase = context.fileCase
+
 		// Determine output directory
 		const outputDir =
 			options.outputPath ||
 			this.resolvePath(this.config.output?.portsDir || 'src/ports')
-		const portDir = join(outputDir, context.nameKebab)
+
+		// Use configured file case for directory and file names
+		const fileName = this.getFileName(options.name, fileCase)
+		const portDir = join(outputDir, fileName)
 
 		// Generate file list
 		const files: FileToGenerate[] = []
 
 		// 1. Port interface (always generated)
-		const interfaceContent = await this.renderTemplate(
+		let interfaceContent = await this.renderTemplate(
 			join(templateDir, 'interface.hbs'),
 			context,
 		)
+		interfaceContent = this.applyStyleConfig(interfaceContent, context)
 		files.push({
-			path: join(portDir, `${context.nameKebab}.port.ts`),
+			path: join(portDir, `${fileName}.port.ts`),
 			content: interfaceContent,
 		})
 
 		// 2. Port token (always generated)
-		const tokenContent = await this.renderTemplate(
+		let tokenContent = await this.renderTemplate(
 			join(templateDir, 'token.hbs'),
 			context,
 		)
+		tokenContent = this.applyStyleConfig(tokenContent, context)
 		files.push({
-			path: join(portDir, `${context.nameKebab}.token.ts`),
+			path: join(portDir, `${fileName}.token.ts`),
 			content: tokenContent,
 		})
 
 		// 3. Port service (optional based on includeService option)
 		if (context.includeService) {
-			const serviceContent = await this.renderTemplate(
+			let serviceContent = await this.renderTemplate(
 				join(templateDir, 'service.hbs'),
 				context,
 			)
+			serviceContent = this.applyStyleConfig(serviceContent, context)
 			files.push({
-				path: join(portDir, `${context.nameKebab}.service.ts`),
+				path: join(portDir, `${fileName}.service.ts`),
 				content: serviceContent,
 			})
 		}
 
 		// 4. Port module (optional based on includeModule option)
 		if (context.includeModule) {
-			const moduleContent = await this.renderTemplate(
+			let moduleContent = await this.renderTemplate(
 				join(templateDir, 'module.hbs'),
 				context,
 			)
+			moduleContent = this.applyStyleConfig(moduleContent, context)
 			files.push({
-				path: join(portDir, `${context.nameKebab}.module.ts`),
+				path: join(portDir, `${fileName}.module.ts`),
 				content: moduleContent,
 			})
 		}
 
 		// 5. Index file (barrel export)
-		const indexContent = await this.renderTemplate(
+		let indexContent = await this.renderTemplate(
 			join(templateDir, 'index.hbs'),
 			context,
 		)
+		indexContent = this.applyStyleConfig(indexContent, context)
 		files.push({
 			path: join(portDir, 'index.ts'),
 			content: indexContent,
 		})
 
+		// 6. Example files (optional based on generateExample and registrationType)
+		if (context.generateExample && context.registrationType) {
+			const exampleFileName =
+				context.registrationType === 'sync'
+					? `${fileName}.sync.example.ts`
+					: `${fileName}.async.example.ts`
+
+			const exampleTemplate =
+				context.registrationType === 'sync'
+					? 'port-sync.example.hbs'
+					: 'port-async.example.hbs'
+
+			let exampleContent = await this.renderTemplate(
+				join(this.getTemplateDir('examples'), exampleTemplate),
+				context,
+			)
+			exampleContent = this.applyStyleConfig(exampleContent, context)
+			files.push({
+				path: join(portDir, exampleFileName),
+				content: exampleContent,
+			})
+		}
+
 		// Generate all files
-		const generatedFiles = await this.generateFiles(files, options.dryRun)
+		const generatedFiles = await this.generateFiles(
+			files,
+			options.dryRun,
+			options.force,
+		)
 
 		return {
 			success: true,

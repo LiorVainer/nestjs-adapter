@@ -36,26 +36,33 @@ export function ProgressIndicator({
 
 			{steps.map((step) => (
 				<Box key={step.id} flexDirection="row" gap={1}>
-					{step.status === 'in_progress' && <Spinner type="dots" />}
-					{step.status === 'completed' && <Text color="green">✓</Text>}
-					{step.status === 'failed' && <Text color="red">✗</Text>}
-					{step.status === 'pending' && <Text dimColor>○</Text>}
-
-					<Text
-						color={
-							step.status === 'completed'
-								? 'green'
-								: step.status === 'failed'
-									? 'red'
-									: step.status === 'in_progress'
-										? 'cyan'
-										: 'gray'
-						}
-					>
-						{step.label}
-					</Text>
-
-					{step.message && <Text dimColor> - {step.message}</Text>}
+					{step.status === 'in_progress' && (
+						<>
+							<Spinner label={step.label} />
+							{step.message && <Text dimColor> - {step.message}</Text>}
+						</>
+					)}
+					{step.status === 'completed' && (
+						<>
+							<Text color="green">✓</Text>
+							<Text color="green">{step.label}</Text>
+							{step.message && <Text dimColor> - {step.message}</Text>}
+						</>
+					)}
+					{step.status === 'failed' && (
+						<>
+							<Text color="red">✗</Text>
+							<Text color="red">{step.label}</Text>
+							{step.message && <Text dimColor> - {step.message}</Text>}
+						</>
+					)}
+					{step.status === 'pending' && (
+						<>
+							<Text dimColor>○</Text>
+							<Text color="gray">{step.label}</Text>
+							{step.message && <Text dimColor> - {step.message}</Text>}
+						</>
+					)}
 				</Box>
 			))}
 		</Box>

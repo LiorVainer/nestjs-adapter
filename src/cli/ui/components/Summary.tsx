@@ -5,7 +5,7 @@
  */
 
 import { relative } from 'node:path'
-import { Badge } from '@inkjs/ui'
+import { Badge, StatusMessage } from '@inkjs/ui'
 import { Box, Text } from 'ink'
 
 export interface SummaryProps {
@@ -112,14 +112,12 @@ export function Summary({
 		<Box flexDirection="column" gap={2}>
 			<Box>
 				{success ? (
-					<Text color="green" bold>
-						✅ Successfully generated {filesGenerated}/{totalFiles} files
+					<StatusMessage variant="success">
+						Successfully generated {filesGenerated}/{totalFiles} files
 						{duration ? ` in ${formatDuration(duration)}` : ''}
-					</Text>
+					</StatusMessage>
 				) : (
-					<Text color="red" bold>
-						❌ Generation failed
-					</Text>
+					<StatusMessage variant="error">Generation failed</StatusMessage>
 				)}
 			</Box>
 

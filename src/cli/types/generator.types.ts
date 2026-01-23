@@ -10,6 +10,7 @@ export interface GeneratorOptions {
 	registrationType?: 'sync' | 'async'
 	generateExample?: boolean
 	dryRun?: boolean
+	force?: boolean
 }
 
 export interface GeneratorContext extends Record<string, unknown> {
@@ -25,6 +26,9 @@ export interface GeneratorContext extends Record<string, unknown> {
 	namePascal: string
 	nameSnake: string
 	nameScreamingSnake: string
+
+	// File name (transformed based on fileCase config)
+	fileName: string
 
 	// Configuration
 	portSuffix: string

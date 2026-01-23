@@ -57,16 +57,18 @@ export abstract class BaseGenerator {
 	 * @param filePath - Destination file path
 	 * @param content - File content
 	 * @param dryRun - If true, don't actually write the file
+	 * @param force - If true, overwrite existing files
 	 * @returns WriteResult indicating success and conflict status
 	 */
 	protected async writeFile(
 		filePath: string,
 		content: string,
 		dryRun = false,
+		force = false,
 	): Promise<import('../utils/file-writer').WriteResult> {
 		return writeFile(filePath, content, {
 			dryRun,
-			force: false,
+			force,
 		})
 	}
 
@@ -119,6 +121,13 @@ export abstract class BaseGenerator {
 	): GeneratorContext {
 		const names = this.getNameVariations(options.name)
 
+		// Get configured file case
+		const fileCase = (this.config.naming?.fileCase ??
+			defaultConfig.naming.fileCase) as 'kebab' | 'camel' | 'pascal'
+
+		// Get file name based on configured file case
+		const fileName = this.getFileName(options.name, fileCase)
+
 		return {
 			...names,
 			// Add "name*" aliases for template compatibility
@@ -127,13 +136,14 @@ export abstract class BaseGenerator {
 			namePascal: names.pascal,
 			nameSnake: names.snake,
 			nameScreamingSnake: names.screamingSnake,
+			// Add fileName based on configured file case
+			fileName,
 			// Naming configuration - use defaults as fallback
 			portSuffix: (this.config.naming?.portSuffix ??
 				defaultConfig.naming.portSuffix) as string,
 			adapterSuffix: (this.config.naming?.adapterSuffix ??
 				defaultConfig.naming.adapterSuffix) as string,
-			fileCase: (this.config.naming?.fileCase ??
-				defaultConfig.naming.fileCase) as 'kebab' | 'camel' | 'pascal',
+			fileCase,
 			// Style configuration - use defaults as fallback
 			indent: (this.config.style?.indent ?? defaultConfig.style.indent) as
 				| 'tab'
@@ -157,22 +167,111 @@ export abstract class BaseGenerator {
 	}
 
 	/**
+	 * Get the file name based on the configured file case.
+	 *
+	 * @param name - Original name (kebab-case)
+	 * @param fileCase - Desired file case
+	 * @returns Transformed file name
+	 */
+	protected getFileName(
+		name: string,
+		fileCase: 'kebab' | 'camel' | 'pascal' = 'kebab',
+	): string {
+		const names = this.getNameVariations(name)
+		switch (fileCase) {
+			case 'camel':
+				return names.camel
+			case 'pascal':
+				return names.pascal
+			default:
+				return names.kebab
+		}
+	}
+
+	/**
+	 * Apply style configuration to generated code.
+	 *
+	 * @param content - Generated code content
+	 * @param context - Template context with style settings
+	 * @returns Styled code content
+	 */
+	protected applyStyleConfig(
+		content: string,
+		context: GeneratorContext,
+	): string {
+		let styled = content
+
+		// Apply quote style (single or double)
+		if (context.quotes === 'double') {
+			// Convert single quotes to double quotes in imports and strings
+			// But preserve quotes in template literals and comments
+			styled = styled.replace(
+				/import\s+(.+?)\s+from\s+'([^']+)'/g,
+				'import $1 from "$2"',
+			)
+			styled = styled.replace(/Symbol\('([^']+)'\)/g, 'Symbol("$1")')
+		}
+
+		// Apply semicolon preference
+		if (context.semicolons) {
+			// Add semicolons at end of lines that should have them
+			// Match lines ending with: ), }, ], or identifier, but not already having semicolon
+			styled = styled.replace(
+				/^(export\s+.+?)(\s*)$/gm,
+				(match, code, whitespace) => {
+					const trimmed = code.trim()
+					// Don't add to comments, empty lines, lines already ending with semicolon,
+					// or lines ending with opening braces (interface/class declarations)
+					if (
+						trimmed.startsWith('//') ||
+						trimmed === '' ||
+						trimmed.endsWith(';') ||
+						trimmed.endsWith('{')
+					) {
+						return match
+					}
+					return `${code};${whitespace}`
+				},
+			)
+		} else {
+			// Remove semicolons at end of lines
+			styled = styled.replace(/;(\s*$)/gm, '$1')
+		}
+
+		// Apply indentation (tab vs spaces)
+		if (context.indent !== 'tab') {
+			const spaces = ' '.repeat(context.indent)
+			// Replace tabs with configured number of spaces
+			styled = styled.replace(/\t/g, spaces)
+		}
+
+		return styled
+	}
+
+	/**
 	 * Generate files from a list of file specifications.
 	 *
 	 * @param files - Array of files to generate
 	 * @param dryRun - If true, don't actually write files
+	 * @param force - If true, overwrite existing files
 	 * @returns Array of successfully generated file paths
 	 * @throws Error if any files fail to write
 	 */
 	protected async generateFiles(
 		files: FileToGenerate[],
 		dryRun = false,
+		force = false,
 	): Promise<string[]> {
 		const generatedFiles: string[] = []
 		const failures: Array<{ path: string; error: string }> = []
 
 		for (const file of files) {
-			const result = await this.writeFile(file.path, file.content, dryRun)
+			const result = await this.writeFile(
+				file.path,
+				file.content,
+				dryRun,
+				force,
+			)
 
 			if (result.success) {
 				generatedFiles.push(file.path)

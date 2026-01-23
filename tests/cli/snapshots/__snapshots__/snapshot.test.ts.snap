@@ -1,0 +1,295 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`Snapshot Tests Port Generator Snapshots 11.1.1 - default port generation snapshot: port-default-token 1`] = `
+"export const CACHE_PORT = Symbol('CACHE_PORT');
+
+export type CacheToken = typeof CACHE_PORT;
+"
+`;
+
+exports[`Snapshot Tests Port Generator Snapshots 11.1.1 - default port generation snapshot: port-default-interface 1`] = `
+"export interface CachePort {
+	// Example method signatures (uncomment and modify as needed):
+	// getCache(id: string): Promise<Cache>
+	// createCache(data: CreateCacheDto): Promise<Cache>
+	// updateCache(id: string, data: UpdateCacheDto): Promise<Cache>
+	// deleteCache(id: string): Promise<void>
+}
+"
+`;
+
+exports[`Snapshot Tests Port Generator Snapshots 11.1.2 - port with module snapshot: port-with-module 1`] = `
+"import { Module } from '@nestjs/common'
+import { DomainModule } from 'nest-hex'
+import type { MessagingService } from './messaging.service'
+
+@Module({})
+export class MessagingModule extends DomainModule {};
+"
+`;
+
+exports[`Snapshot Tests Port Generator Snapshots 11.1.2 - port with module snapshot: port-with-service 1`] = `
+"import { Injectable } from '@nestjs/common'
+import { InjectPort } from 'nest-hex'
+import type { MessagingPort } from './messaging.port'
+import { MESSAGING_PORT } from './messaging.token'
+
+@Injectable()
+export class MessagingService {
+	constructor(
+		@InjectPort(MESSAGING_PORT)
+		private readonly messaging: MessagingPort,
+	) {}
+}
+"
+`;
+
+exports[`Snapshot Tests Port Generator Snapshots 11.1.3 - port without module snapshot: port-minimal-index 1`] = `
+"export * from './minimal-port.port';
+export * from './minimal-port.token';
+"
+`;
+
+exports[`Snapshot Tests Port Generator Snapshots 11.1.4 - port with custom naming config snapshot: port-contract-naming 1`] = `
+"export const PAYMENT_CONTRACT = Symbol('PAYMENT_CONTRACT');
+
+export type PaymentToken = typeof PAYMENT_CONTRACT;
+"
+`;
+
+exports[`Snapshot Tests Port Generator Snapshots 11.1.5 - port with custom style config snapshot: port-prettier-style 1`] = `
+"export const STYLED_PORT_PORT = Symbol("STYLED_PORT_PORT")
+
+export type StyledPortToken = typeof STYLED_PORT_PORT
+"
+`;
+
+exports[`Snapshot Tests Adapter Generator Snapshots 11.2.1 - default adapter generation snapshot: adapter-default 1`] = `
+"import { Adapter, AdapterBase } from 'nest-hex'
+import { RedisService } from './redis.service'
+import type { RedisConfigOptions } from './redis.types'
+
+@Adapter({
+	portToken: REDIS_PORT,
+	implementation: RedisService,
+})
+export class RedisAdapter extends AdapterBase<RedisConfigOptions> {};
+"
+`;
+
+exports[`Snapshot Tests Adapter Generator Snapshots 11.2.2 - adapter with port reference snapshot: adapter-with-port 1`] = `
+"import { Adapter, AdapterBase } from 'nest-hex'
+import { OBJECT_STORAGE_PORT } from '../../ports/object-storage'
+import { S3StorageService } from './s3-storage.service'
+import type { S3StorageConfigOptions, S3StorageAdapterConfig } from './s3-storage.types'
+
+@Adapter<S3StorageAdapterConfig>({
+	portToken: OBJECT_STORAGE_PORT,
+	implementation: S3StorageService,
+})
+export class S3StorageAdapter extends AdapterBase<S3StorageConfigOptions> {};
+"
+`;
+
+exports[`Snapshot Tests Adapter Generator Snapshots 11.2.2 - adapter with port reference snapshot: adapter-service-with-port 1`] = `
+"import { Injectable } from '@nestjs/common'
+import type { ObjectStoragePort } from '../../ports/object-storage'
+import type { S3StorageConfigOptions } from './s3-storage.types'
+
+@Injectable()
+export class S3StorageService implements ObjectStoragePort {
+	constructor(private readonly options: S3StorageConfigOptions) {}
+}
+"
+`;
+
+exports[`Snapshot Tests Adapter Generator Snapshots 11.2.3 - adapter with custom naming config snapshot: adapter-custom-naming 1`] = `
+"import { Adapter, AdapterBase } from 'nest-hex'
+import { CustomAdapterService } from './CustomAdapter.service'
+import type { CustomAdapterConfigOptions } from './CustomAdapter.types'
+
+@Adapter({
+	portToken: CUSTOM_ADAPTER_PORT,
+	implementation: CustomAdapterService,
+})
+export class CustomAdapterImpl extends AdapterBase<CustomAdapterConfigOptions> {};
+"
+`;
+
+exports[`Snapshot Tests Adapter Generator Snapshots 11.2.4 - adapter with custom style config snapshot: adapter-prettier-style 1`] = `
+"import { Adapter, AdapterBase } from "nest-hex"
+import { StyledAdapterService } from "./styled-adapter.service"
+import type { StyledAdapterConfigOptions } from "./styled-adapter.types"
+
+@Adapter({
+  portToken: STYLED_ADAPTER_PORT,
+  implementation: StyledAdapterService,
+})
+export class StyledAdapterAdapter extends AdapterBase<StyledAdapterConfigOptions> {}
+"
+`;
+
+exports[`Snapshot Tests Service Generator Snapshots 11.3.1 - service with port injection snapshot: service-with-port 1`] = `
+"/**
+ * UserManagement Service
+ *
+ * This service uses UserRepository via dependency injection.
+ *
+ * Key Points:
+ * - Injects port using @InjectPort decorator
+ * - Infrastructure-agnostic (works with any adapter)
+ * - Contains application/business logic
+ */
+
+import { Injectable } from '@nestjs/common'
+import { InjectPort } from 'nest-hex'
+import type { UserRepositoryPort } from '../../ports/user-repository'
+import { USER_REPOSITORY_PORT } from '../../ports/user-repository'
+
+/**
+ * Service for UserManagement.
+ */
+@Injectable()
+export class UserManagementService {
+	constructor(
+		@InjectPort(USER_REPOSITORY_PORT)
+		private readonly userRepository: UserRepositoryPort,
+	) {}
+
+	/**
+	 * TODO: Add your service methods here
+	 *
+	 * Example:
+	 * async process(data: unknown): Promise<void> {
+	 *   const result = await this.userRepository.execute(data)
+	 *   // Add application logic here
+	 * }
+	 */
+}
+"
+`;
+
+exports[`Snapshot Tests Service Generator Snapshots 11.3.2 - service without port injection snapshot: service-without-port 1`] = `
+"/**
+ * UtilityService Service
+ *
+ * This service uses [Port Name] via dependency injection.
+ *
+ * Key Points:
+ * - Injects port using @InjectPort decorator
+ * - Infrastructure-agnostic (works with any adapter)
+ * - Contains application/business logic
+ */
+
+import { Injectable } from '@nestjs/common'
+// import { InjectPort } from 'nest-hex'
+// import type { YourPort } from '../path/to/your.port'
+// import { YOUR_PORT } from '../path/to/your.token'
+
+/**
+ * Service for UtilityService.
+ */
+@Injectable()
+export class UtilityServiceService {
+	/**
+	 * TODO: Add port injection and service methods
+	 *
+	 * To inject a port, use the @InjectPort decorator:
+	 *
+	 * constructor(
+	 *   @InjectPort(YOUR_PORT)
+	 *   private readonly yourPort: YourPort,
+	 * ) {}
+	 *
+	 * Then add your service methods that use the port:
+	 *
+	 * async yourMethod(): Promise<void> {
+	 *   await this.yourPort.doSomething()
+	 * }
+	 */
+}
+"
+`;
+
+exports[`Snapshot Tests Configuration Variation Snapshots file case variations produce consistent output: port-filecase-kebab 1`] = `
+"export const TEST_PORT_PORT = Symbol('TEST_PORT_PORT');
+
+export type TestPortToken = typeof TEST_PORT_PORT;
+"
+`;
+
+exports[`Snapshot Tests Configuration Variation Snapshots file case variations produce consistent output: port-filecase-camel 1`] = `
+"export const TEST_PORT_PORT = Symbol('TEST_PORT_PORT');
+
+export type TestPortToken = typeof TEST_PORT_PORT;
+"
+`;
+
+exports[`Snapshot Tests Configuration Variation Snapshots file case variations produce consistent output: port-filecase-pascal 1`] = `
+"export const TEST_PORT_PORT = Symbol('TEST_PORT_PORT');
+
+export type TestPortToken = typeof TEST_PORT_PORT;
+"
+`;
+
+exports[`Snapshot Tests Configuration Variation Snapshots indent variations produce consistent output: port-indent-tab 1`] = `
+"import { Injectable } from '@nestjs/common'
+import { InjectPort } from 'nest-hex'
+import type { IndentTestPort } from './indent-test.port'
+import { INDENT_TEST_PORT } from './indent-test.token'
+
+@Injectable()
+export class IndentTestService {
+	constructor(
+		@InjectPort(INDENT_TEST_PORT)
+		private readonly indentTest: IndentTestPort,
+	) {}
+}
+"
+`;
+
+exports[`Snapshot Tests Configuration Variation Snapshots indent variations produce consistent output: port-indent-2 1`] = `
+"import { Injectable } from '@nestjs/common'
+import { InjectPort } from 'nest-hex'
+import type { IndentTestPort } from './indent-test.port'
+import { INDENT_TEST_PORT } from './indent-test.token'
+
+@Injectable()
+export class IndentTestService {
+  constructor(
+    @InjectPort(INDENT_TEST_PORT)
+    private readonly indentTest: IndentTestPort,
+  ) {}
+}
+"
+`;
+
+exports[`Snapshot Tests Configuration Variation Snapshots indent variations produce consistent output: port-indent-4 1`] = `
+"import { Injectable } from '@nestjs/common'
+import { InjectPort } from 'nest-hex'
+import type { IndentTestPort } from './indent-test.port'
+import { INDENT_TEST_PORT } from './indent-test.token'
+
+@Injectable()
+export class IndentTestService {
+    constructor(
+        @InjectPort(INDENT_TEST_PORT)
+        private readonly indentTest: IndentTestPort,
+    ) {}
+}
+"
+`;
+
+exports[`Snapshot Tests Configuration Variation Snapshots quote variations produce consistent output: port-quote-single 1`] = `
+"export const QUOTE_TEST_PORT = Symbol('QUOTE_TEST_PORT');
+
+export type QuoteTestToken = typeof QUOTE_TEST_PORT;
+"
+`;
+
+exports[`Snapshot Tests Configuration Variation Snapshots quote variations produce consistent output: port-quote-double 1`] = `
+"export const QUOTE_TEST_PORT = Symbol("QUOTE_TEST_PORT");
+
+export type QuoteTestToken = typeof QUOTE_TEST_PORT;
+"
+`;
