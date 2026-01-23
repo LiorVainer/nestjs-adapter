@@ -4,33 +4,26 @@
  * Main command for generating ports, adapters, and services.
  */
 
-import { Box, render, Text, useInput } from 'ink'
-import { useEffect, useState } from 'react'
-import { loadConfig } from '../config/loader'
-import {
-	AdapterGenerator,
-	PortGenerator,
-	ServiceGenerator,
-} from '../generators'
-import type { GeneratorResult } from '../types'
+import { Box, render, Text } from 'ink'
 import {
 	NameInput,
 	PortSelector,
 	ProgressIndicator,
-	type ProgressStep,
 	Summary,
 	TypeSelector,
 } from '../ui/components'
-import { detectLinter } from '../utils/linter-detector'
-import { runLinter } from '../utils/linter-runner'
-import type { PortInfo } from '../utils/port-scanner'
-import { scanAvailablePorts } from '../utils/port-scanner'
+import {
+	useGeneration,
+	useGenerationForm,
+	useKeyboardNavigation,
+	usePortScanner,
+} from './hooks'
 
 interface GenerateCommandOptions {
 	type?: 'port' | 'adapter' | 'service' | 'full'
 	name?: string
-	portName?: string // For 'full' type from CLI args
-	adapterName?: string // For 'full' type from CLI args
+	portName?: string
+	adapterName?: string
 	outputPath?: string
 	dryRun?: boolean
 	force?: boolean
@@ -38,382 +31,57 @@ interface GenerateCommandOptions {
 	port?: string
 }
 
-interface FileProgresState {
-	fileName: string
-	status: 'pending' | 'generating' | 'completed' | 'skipped' | 'failed'
-	error?: string
-}
-
 /**
  * Main generation UI component
  */
 function GenerateUI({ options }: { options: GenerateCommandOptions }) {
-	const [selectedType, setSelectedType] = useState<
-		'port' | 'adapter' | 'service' | 'full' | undefined
-	>(options.type)
-	const [selectedName, setSelectedName] = useState<string | undefined>(
-		options.name,
-	)
-	const [portName, setPortName] = useState<string | undefined>(options.portName)
-	const [adapterName, setAdapterName] = useState<string | undefined>(
-		options.adapterName,
-	)
-	const [selectedPortInfo, setSelectedPortInfo] = useState<PortInfo | null>(
-		null,
-	)
-	const [availablePorts, setAvailablePorts] = useState<PortInfo[]>([])
-	const [portsLoaded, setPortsLoaded] = useState(false)
-	const [showTypeSelector, setShowTypeSelector] = useState(!options.type)
-	const [showPortSelector, setShowPortSelector] = useState(false)
-	const [showNameInput, setShowNameInput] = useState(() => {
-		// Show name input if type is provided but names are missing
-		if (!options.type) return false
-		if (options.type === 'full') {
-			return !options.portName || !options.adapterName
-		}
-		return !options.name
-	})
-	const [nameInputStep, setNameInputStep] = useState<'port' | 'adapter'>(() => {
-		// If port name is provided but adapter name is missing, start at adapter step
-		if (options.type === 'full' && options.portName && !options.adapterName) {
-			return 'adapter'
-		}
-		return 'port'
-	})
-	const [steps, setSteps] = useState<ProgressStep[]>([])
-	const [_files, _setFiles] = useState<FileProgresState[]>([])
-	const [result, setResult] = useState<GeneratorResult | null>(null)
-	const [portResultFiles, setPortResultFiles] = useState<string[] | undefined>()
-	const [adapterResultFiles, setAdapterResultFiles] = useState<
-		string[] | undefined
-	>()
-	const [duration, setDuration] = useState<number | undefined>()
-	const [error, setError] = useState<Error | null>(null)
-
-	// Handle type selection
-	const handleTypeSelect = (type: 'port' | 'adapter' | 'service' | 'full') => {
-		setSelectedType(type)
-		setShowTypeSelector(false)
-
-		// For adapter type, show port selector first
-		if (type === 'adapter' && !options.name) {
-			setShowPortSelector(true)
-		} else if (!options.name) {
-			setShowNameInput(true)
-			if (type === 'full') {
-				setNameInputStep('port')
-			}
-		}
-	}
-
-	// Handle port selection for adapter
-	const handlePortSelect = (portInfo: PortInfo) => {
-		setSelectedPortInfo(portInfo)
-		setShowPortSelector(false)
-		setShowNameInput(true)
-	}
-
-	// Handle going back from port selector to type selector
-	const handlePortBack = () => {
-		setShowPortSelector(false)
-		setShowTypeSelector(true)
-		setSelectedType(undefined)
-	}
-
-	// Handle Ctrl+Q key press for back navigation
-	useInput((input, key) => {
-		if (key.ctrl && input === 'q') {
-			if (showPortSelector) {
-				handlePortBack()
-			} else if (showNameInput && !result && !error) {
-				// Go back from name input
-				if (selectedType === 'adapter') {
-					setShowNameInput(false)
-					setShowPortSelector(true)
-				} else if (selectedType === 'full') {
-					if (nameInputStep === 'adapter') {
-						// Go back to port name input
-						setNameInputStep('port')
-						setAdapterName(undefined)
-					} else {
-						// Go back to type selector
-						setShowNameInput(false)
-						setShowTypeSelector(true)
-						setSelectedType(undefined)
-					}
-				} else {
-					// For port and service, go back to type selector
-					setShowNameInput(false)
-					setShowTypeSelector(true)
-					setSelectedType(undefined)
-				}
-			}
-		}
+	const form = useGenerationForm({
+		type: options.type,
+		name: options.name,
+		portName: options.portName,
+		adapterName: options.adapterName,
 	})
 
-	// Handle name input
-	const handleNameInput = (name: string) => {
-		// For 'full' type, we need two names: port and adapter
-		if (selectedType === 'full') {
-			if (nameInputStep === 'port') {
-				setPortName(name)
-				setNameInputStep('adapter')
-			} else {
-				setAdapterName(name)
-				setShowNameInput(false)
-			}
-		} else {
-			setSelectedName(name)
-			setShowNameInput(false)
-		}
-	}
+	const { availablePorts, isLoading: portsLoading } = usePortScanner(
+		form.showPortSelector,
+	)
 
-	// Load available ports when port selector is shown
-	useEffect(() => {
-		if (showPortSelector && !portsLoaded) {
-			loadConfig().then((cfg) => {
-				const ports = scanAvailablePorts(cfg)
-				setAvailablePorts(ports)
-				setPortsLoaded(true)
-			})
-		}
-	}, [showPortSelector, portsLoaded])
+	const generation = useGeneration({
+		selectedType: form.selectedType,
+		selectedName: form.selectedName,
+		portName: form.portName,
+		adapterName: form.adapterName,
+		selectedPortInfo: form.selectedPortInfo,
+		options: {
+			outputPath: options.outputPath,
+			dryRun: options.dryRun,
+			noLint: options.noLint,
+			port: options.port,
+		},
+	})
 
-	useEffect(() => {
-		// Only start generation when we have required names
-		if (!selectedType) {
-			return
-		}
+	const canNavigateBack =
+		(form.showPortSelector || form.showNameInput) &&
+		!generation.result &&
+		!generation.error
 
-		// For 'full' type, we need both port and adapter names
-		if (selectedType === 'full') {
-			if (!portName || !adapterName) {
-				return
-			}
-		} else {
-			// For other types, we need selectedName
-			if (!selectedName) {
-				return
-			}
-		}
+	useKeyboardNavigation({
+		canNavigateBack,
+		onBack: form.navigateBack,
+	})
 
-		async function generate() {
-			const startTime = Date.now()
-			try {
-				// Step 1: Load configuration
-				setSteps([
-					{
-						id: 'config',
-						label: 'Loading configuration',
-						status: 'in_progress',
-					},
-				])
-
-				const config = await loadConfig()
-
-				setSteps((prev: ProgressStep[]) =>
-					prev.map((s: ProgressStep) =>
-						s.id === 'config' ? { ...s, status: 'completed' as const } : s,
-					),
-				)
-
-				// Step 2: Generate files
-				setSteps((prev: ProgressStep[]) => [
-					...prev,
-					{
-						id: 'generate',
-						label: 'Generating files',
-						status: 'in_progress' as const,
-					},
-				])
-
-				// TypeScript narrowing: we know these are defined from the condition above
-				const type = selectedType
-
-				let genResult: GeneratorResult
-
-				// Handle 'full' type - generate both port and adapter
-				if (type === 'full' && portName && adapterName) {
-					// TypeScript now knows these are defined
-					const port = portName
-					const adapter = adapterName
-
-					// Generate port first
-					const portGenerator = new PortGenerator(config)
-					const portResult = await portGenerator.generate({
-						name: port,
-						outputPath: options.outputPath,
-						dryRun: options.dryRun,
-					})
-
-					// Generate adapter
-					const adapterGenerator = new AdapterGenerator(config)
-					const adapterResult = await adapterGenerator.generate({
-						name: adapter,
-						portName: port,
-						outputPath: options.outputPath,
-						dryRun: options.dryRun,
-					})
-
-					// Store separate file arrays for display
-					setPortResultFiles(portResult.files)
-					setAdapterResultFiles(adapterResult.files)
-
-					// Combine results
-					genResult = {
-						success: portResult.success && adapterResult.success,
-						files: [
-							...(portResult.files || []),
-							...(adapterResult.files || []),
-						],
-						message:
-							portResult.success && adapterResult.success
-								? `Generated port '${port}' and adapter '${adapter}'`
-								: 'Some files failed to generate',
-					}
-				} else if (selectedName) {
-					// Handle single generator types
-					// TypeScript now knows selectedName is defined
-					const name = selectedName
-					let generator: PortGenerator | AdapterGenerator | ServiceGenerator
-
-					switch (type) {
-						case 'port': {
-							generator = new PortGenerator(config)
-							const portOptions = {
-								name,
-								outputPath: options.outputPath,
-								dryRun: options.dryRun,
-							}
-							genResult = await generator.generate(portOptions)
-							break
-						}
-						case 'adapter': {
-							generator = new AdapterGenerator(config)
-							const adapterOptions = {
-								name,
-								portName: selectedPortInfo?.name || options.port,
-								portPath: selectedPortInfo?.tokenImportPath,
-								portTokenName: selectedPortInfo?.tokenName,
-								outputPath: options.outputPath,
-								dryRun: options.dryRun,
-							}
-							genResult = await generator.generate(adapterOptions)
-							break
-						}
-						case 'service': {
-							generator = new ServiceGenerator(config)
-							const serviceOptions = {
-								name,
-								outputPath: options.outputPath,
-								dryRun: options.dryRun,
-							}
-							genResult = await generator.generate(serviceOptions)
-							break
-						}
-						default:
-							throw new Error(`Unknown generator type: ${type}`)
-					}
-				} else {
-					throw new Error(
-						'Invalid state: selectedName is required for non-full generator types',
-					)
-				}
-
-				setResult(genResult)
-				setDuration(Date.now() - startTime)
-
-				setSteps((prev: ProgressStep[]) =>
-					prev.map((s: ProgressStep) =>
-						s.id === 'generate' ? { ...s, status: 'completed' as const } : s,
-					),
-				)
-
-				// Step 3: Lint files (if not disabled and not in dry-run mode)
-				if (!options.noLint && !options.dryRun && genResult.success) {
-					setSteps((prev: ProgressStep[]) => [
-						...prev,
-						{
-							id: 'lint',
-							label: 'Linting files',
-							status: 'in_progress' as const,
-						},
-					])
-
-					const linterConfig = await detectLinter(process.cwd())
-
-					if (linterConfig.type !== 'none' && genResult.files) {
-						const lintResult = await runLinter(
-							linterConfig,
-							genResult.files,
-							process.cwd(),
-						)
-
-						setSteps((prev: ProgressStep[]) =>
-							prev.map((s: ProgressStep) =>
-								s.id === 'lint'
-									? {
-											...s,
-											status: lintResult.success
-												? ('completed' as const)
-												: ('failed' as const),
-											message: lintResult.success
-												? 'Passed'
-												: 'Failed (see output)',
-										}
-									: s,
-							),
-						)
-					} else {
-						setSteps((prev: ProgressStep[]) =>
-							prev.map((s: ProgressStep) =>
-								s.id === 'lint'
-									? {
-											...s,
-											status: 'completed' as const,
-											message: 'No linter detected',
-										}
-									: s,
-							),
-						)
-					}
-				}
-			} catch (err) {
-				setError(err instanceof Error ? err : new Error(String(err)))
-				setSteps((prev: ProgressStep[]) =>
-					prev.map((s: ProgressStep) =>
-						s.status === 'in_progress'
-							? { ...s, status: 'failed' as const }
-							: s,
-					),
-				)
-			}
-		}
-
-		generate()
-	}, [
-		selectedType,
-		selectedName,
-		portName,
-		adapterName,
-		options,
-		selectedPortInfo?.name,
-		selectedPortInfo?.tokenImportPath,
-		selectedPortInfo?.tokenName,
-	])
-
-	// Show type selector if type not provided
-	if (showTypeSelector) {
+	// Render type selector
+	if (form.showTypeSelector) {
 		return (
 			<Box paddingY={1}>
-				<TypeSelector onSubmit={handleTypeSelect} />
+				<TypeSelector onSubmit={form.handleTypeSelect} />
 			</Box>
 		)
 	}
 
-	// Show port selector for adapter type
-	if (showPortSelector && selectedType === 'adapter') {
-		if (!portsLoaded) {
+	// Render port selector for adapter type
+	if (form.showPortSelector && form.selectedType === 'adapter') {
+		if (portsLoading) {
 			return (
 				<Box paddingY={1}>
 					<Text>Loading available ports...</Text>
@@ -425,110 +93,150 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 			<Box paddingY={1}>
 				<PortSelector
 					ports={availablePorts}
-					onSubmit={handlePortSelect}
-					onBack={handlePortBack}
+					onSubmit={form.handlePortSelect}
+					onBack={form.handlePortBack}
 				/>
 			</Box>
 		)
 	}
 
-	// Show name input if name not provided
-	if (showNameInput && selectedType) {
+	// Render name input
+	if (form.showNameInput && form.selectedType) {
 		return (
 			<Box paddingY={1}>
 				<NameInput
-					type={selectedType}
-					step={selectedType === 'full' ? nameInputStep : undefined}
+					type={form.selectedType}
+					step={form.selectedType === 'full' ? form.nameInputStep : undefined}
 					portName={
-						selectedType === 'full' && nameInputStep === 'adapter'
-							? portName
+						form.selectedType === 'full' && form.nameInputStep === 'adapter'
+							? form.portName
 							: undefined
 					}
-					onSubmit={handleNameInput}
+					onSubmit={form.handleNameInput}
 				/>
 			</Box>
 		)
 	}
 
-	if (error) {
+	// Render error state
+	if (generation.error) {
 		return (
 			<Box flexDirection="column" paddingY={1}>
 				<Text color="red" bold>
-					❌ Generation failed
+					{'\u274C'} Generation failed
 				</Text>
-				<Text color="red">{error.message}</Text>
+				<Text color="red">{generation.error.message}</Text>
 			</Box>
 		)
 	}
 
-	// Get display title based on type
-	const getTitle = () => {
-		if (!selectedType) return 'Generating...'
-
-		if (selectedType === 'full') {
-			if (portName && adapterName) {
-				return `Generating port '${portName}' and adapter '${adapterName}'`
-			}
-			return 'Generating full module'
-		}
-
-		return `Generating ${selectedType}: ${selectedName || ''}`
-	}
-
+	// Render summary when generation is complete
 	if (
-		result &&
-		selectedType &&
-		(selectedType === 'full' ? portName && adapterName : selectedName)
+		generation.result &&
+		form.selectedType &&
+		(form.selectedType === 'full'
+			? form.portName && form.adapterName
+			: form.selectedName)
 	) {
-		// Determine which component names to pass to Summary
-		const summaryPortName =
-			selectedType === 'full'
-				? portName
-				: selectedType === 'port'
-					? selectedName
-					: undefined
-		const summaryAdapterName =
-			selectedType === 'full'
-				? adapterName
-				: selectedType === 'adapter'
-					? selectedName
-					: undefined
-		const summaryServiceName =
-			selectedType === 'service' ? selectedName : undefined
-
 		return (
 			<Box flexDirection="column" paddingY={1}>
 				<Summary
-					success={result.success}
-					filesGenerated={result.files?.length || 0}
-					totalFiles={result.files?.length || 0}
-					duration={duration}
+					success={generation.result.success}
+					filesGenerated={generation.result.files?.length || 0}
+					totalFiles={generation.result.files?.length || 0}
+					duration={generation.duration}
 					outputPath={options.outputPath}
 					files={
-						selectedType === 'full' ? undefined : result.files
-					} /* Don't pass files array for full mode */
-					portFiles={portResultFiles}
-					adapterFiles={adapterResultFiles}
-					tips={[
-						'Import generated files in your modules',
-						selectedType === 'port' && selectedName
-							? 'Generate an adapter with: npx nest-hex generate adapter <name> --port ' +
-								selectedName
-							: undefined,
-					].filter((t): t is string => t !== undefined)}
-					portName={summaryPortName}
-					adapterName={summaryAdapterName}
-					serviceName={summaryServiceName}
+						form.selectedType === 'full' ? undefined : generation.result.files
+					}
+					portFiles={generation.portResultFiles}
+					adapterFiles={generation.adapterResultFiles}
+					tips={buildTips(form.selectedType, form.selectedName)}
+					portName={getSummaryPortName(
+						form.selectedType,
+						form.portName,
+						form.selectedName,
+					)}
+					adapterName={getSummaryAdapterName(
+						form.selectedType,
+						form.adapterName,
+						form.selectedName,
+					)}
+					serviceName={
+						form.selectedType === 'service' ? form.selectedName : undefined
+					}
 				/>
 			</Box>
 		)
 	}
 
+	// Render progress indicator
 	return (
 		<Box paddingY={1}>
-			<ProgressIndicator steps={steps} title={getTitle()} />
+			<ProgressIndicator
+				steps={generation.steps}
+				title={getTitle(
+					form.selectedType,
+					form.selectedName,
+					form.portName,
+					form.adapterName,
+				)}
+			/>
 		</Box>
 	)
+}
+
+function getTitle(
+	selectedType: 'port' | 'adapter' | 'service' | 'full' | undefined,
+	selectedName: string | undefined,
+	portName: string | undefined,
+	adapterName: string | undefined,
+): string {
+	if (!selectedType) return 'Generating...'
+
+	if (selectedType === 'full') {
+		if (portName && adapterName) {
+			return `Generating port '${portName}' and adapter '${adapterName}'`
+		}
+		return 'Generating full module'
+	}
+
+	return `Generating ${selectedType}: ${selectedName || ''}`
+}
+
+function getSummaryPortName(
+	selectedType: 'port' | 'adapter' | 'service' | 'full',
+	portName: string | undefined,
+	selectedName: string | undefined,
+): string | undefined {
+	if (selectedType === 'full') return portName
+	if (selectedType === 'port') return selectedName
+	return undefined
+}
+
+function getSummaryAdapterName(
+	selectedType: 'port' | 'adapter' | 'service' | 'full',
+	adapterName: string | undefined,
+	selectedName: string | undefined,
+): string | undefined {
+	if (selectedType === 'full') return adapterName
+	if (selectedType === 'adapter') return selectedName
+	return undefined
+}
+
+function buildTips(
+	selectedType: 'port' | 'adapter' | 'service' | 'full',
+	selectedName: string | undefined,
+): string[] {
+	const tips = ['Import generated files in your modules']
+
+	if (selectedType === 'port' && selectedName) {
+		tips.push(
+			`Generate an adapter with: npx nest-hex generate adapter <name> --port ${selectedName}`,
+		)
+	}
+
+	return tips
 }
 
 /**
@@ -537,11 +245,9 @@ function GenerateUI({ options }: { options: GenerateCommandOptions }) {
 export async function generateCommand(
 	options: GenerateCommandOptions,
 ): Promise<void> {
-	// Check if we're in an interactive terminal
 	const isInteractive =
 		process.stdin.isTTY && typeof process.stdin.setRawMode === 'function'
 
-	// If not interactive and missing required arguments, show error and usage
 	const missingArgs =
 		!options.type ||
 		(options.type === 'full'
